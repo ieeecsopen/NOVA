@@ -1,0 +1,11 @@
+// The smallest complete NOVA program.
+//
+// Note what is *not* here: there is no `import std.io`, and no free
+// `print` function. Authority to write to the console arrives as the
+// `rt` parameter, and the `! {Runtime}` in the signature is the compiler
+// telling you that it was used.
+
+fn main(rt: Runtime) -> Int ! {Runtime} {
+    rt.print("hello from NOVA");
+    0
+}
