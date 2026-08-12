@@ -1,0 +1,35 @@
+// A small "HTTP-like" example. NOVA v0.2 has no real network capability
+// (Milestone 2's module system exists; a designed `Net` capability
+// does not -- see PROBLEM-SPACE.md P11). This simulates request
+// routing with structs, enums and pattern matching -- the SHAPE such a
+// program takes -- rather than claiming real sockets exist.
+
+struct Request { method: Method, path: String }
+struct Response { status: Int, body: String }
+
+enum Method { Get, Post }
+
+fn route(req: Request) -> Response {
+    match req.method {
+        Method::Get => match req.path {
+            "/health" => Response { status: 200, body: "ok" },
+            "/" => Response { status: 200, body: "welcome" },
+            _ => Response { status: 404, body: "not found" },
+        },
+        Method::Post => Response { status: 405, body: "method not allowed" },
+    }
+}
+
+fn log_response(rt: Runtime, resp: Response) -> Int ! {Runtime} {
+    rt.print(resp.body);
+    resp.status
+}
+
+fn main(rt: Runtime) -> Int ! {Runtime} {
+    let r1 = route(Request { method: Method::Get, path: "/health" });
+    let r2 = route(Request { method: Method::Get, path: "/missing" });
+    let r3 = route(Request { method: Method::Post, path: "/" });
+    log_response(rt, r1);
+    log_response(rt, r2);
+    log_response(rt, r3)
+}
