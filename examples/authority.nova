@@ -1,0 +1,38 @@
+// What the type system will not let you write.
+//
+// Every function below is rejected. Uncomment one at a time and run
+//
+//     python3 -m verifier.refspec check examples/authority.nova
+//
+// to see the diagnostic. This file is expected NOT to compile as written
+// only if you uncomment something; as shipped it compiles.
+
+// error[E0201]: performs `Clock` without declaring it
+// fn undeclared(c: Clock) -> Int {
+//     c.now()
+// }
+
+// error[E0202]: declares `Runtime` but never performs it
+// fn overdeclared(c: Clock) -> Int ! {Clock, Runtime} {
+//     c.now()
+// }
+
+// error[E0203]: the closure captures `c`, so it is not pure
+// fn laundered(c: Clock) -> (() -> Int) {
+//     || c.now()
+// }
+
+// error[E0101]: capabilities cannot be conjured; there is no value here
+// fn forged() -> Int ! {Clock} {
+//     Clock.now()
+// }
+
+// This one is fine: the row is honest.
+fn allowed(c: Clock) -> Int ! {Clock} {
+    c.now()
+}
+
+fn main(rt: Runtime) -> Int ! {Clock, Runtime} {
+    rt.print("see the comments in this file");
+    allowed(rt.clock())
+}
