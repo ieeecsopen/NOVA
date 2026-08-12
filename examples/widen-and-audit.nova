@@ -1,0 +1,15 @@
+// `= widen` (RFC 0001 §4.5) is the one deliberate, syntactically
+// greppable escape from equality-checked effect rows -- for a signature
+// that must stay stable even though its body doesn't yet use every
+// declared capability. Run `nova audit` on this file to see it listed.
+
+fn ping(c: Clock, rt: Runtime) -> Bool ! {Clock, Runtime} = widen {
+    c.now();
+    true
+}
+
+fn main(rt: Runtime) -> Int ! {Clock, Runtime} {
+    let c = rt.clock();
+    rt.print("widened signature in use");
+    if ping(c, rt) { 1 } else { 0 }
+}
