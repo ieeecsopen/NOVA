@@ -1,0 +1,35 @@
+// The motivating example of RFC 0001 §2.
+//
+// `with_retry` is row-polymorphic: it is itself pure, and performs
+// exactly whatever the closure it is given performs. Its signature is
+//
+//     (Int, () -> Int ! r) -> Int ! r
+//
+// so at every call site the reader can see what retrying will re-run.
+// The two call sites below have *different* effect rows, and the
+// compiler tracks them separately.
+
+fn with_retry[r](attempts: Int, f: () -> Int ! r) -> Int ! r {
+    if attempts <= 1 {
+        f()
+    } else {
+        with_retry(attempts - 1, f)
+    }
+}
+
+// Retrying this is safe: it only reads a clock.
+fn timed_read(c: Clock) -> Int ! {Clock} {
+    with_retry(3, || c.now())
+}
+
+// Retrying this is safe for a different reason: it does nothing at all.
+fn pure_compute() -> Int {
+    with_retry(3, || 6 * 7)
+}
+
+fn main(rt: Runtime) -> Int ! {Clock, Runtime} {
+    let c = rt.clock();
+    rt.print("retrying");
+    timed_read(c);
+    pure_compute()
+}
