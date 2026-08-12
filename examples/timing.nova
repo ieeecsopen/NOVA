@@ -1,0 +1,27 @@
+// Deriving a narrower capability from a broader one.
+//
+// `rt.clock()` performs `Runtime` — asking for authority is itself an
+// effect. Using the result performs `Clock`. Both show up in the row, so
+// a reader of `measure`'s signature knows it reads the clock *and* that
+// it obtained that power from the runtime rather than being handed it.
+//
+// Compare `report`, which is handed a Clock directly: its row is just
+// {Clock, Runtime}, and it can never obtain any other capability.
+
+fn measure(rt: Runtime) -> Int ! {Clock, Runtime} {
+    let c = rt.clock();
+    let start = c.now();
+    let end = c.now();
+    end - start
+}
+
+fn report(rt: Runtime, c: Clock) -> Int ! {Clock, Runtime} {
+    let t = c.now();
+    rt.print("clock reads:");
+    t
+}
+
+fn main(rt: Runtime) -> Int ! {Clock, Runtime} {
+    measure(rt);
+    report(rt, rt.clock())
+}
