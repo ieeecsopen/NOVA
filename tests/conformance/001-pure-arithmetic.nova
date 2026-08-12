@@ -1,0 +1,12 @@
+//! expect: ok
+//! sig: add = (Int, Int) -> Int
+//! sig: main = (Runtime) -> Int ! {Runtime}
+//! stdout: pure
+//! exit: 7
+
+fn add(a: Int, b: Int) -> Int { a + b }
+
+fn main(rt: Runtime) -> Int ! {Runtime} {
+    rt.print("pure");
+    add(3, 4)
+}
