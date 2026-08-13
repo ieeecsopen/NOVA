@@ -1,0 +1,8 @@
+//! expect: ok
+//! sig: honest = (Clock) -> (() -> Int ! {Clock})
+// The same closure, declared honestly. Note that `honest` itself is
+// *pure*: building a closure performs no effect (rule (Abs)).
+
+fn honest(c: Clock) -> (() -> Int ! {Clock}) {
+    || c.now()
+}
