@@ -1,0 +1,7 @@
+//! expect: ok
+// `= widen` is the single, greppable escape from equality checking.
+
+fn ping(c: Clock) -> Bool ! {Clock, Runtime} = widen {
+    c.now();
+    true
+}
