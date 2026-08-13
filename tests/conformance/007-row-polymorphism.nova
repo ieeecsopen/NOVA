@@ -1,0 +1,18 @@
+//! expect: ok
+//! sig: with_retry = (Int, () -> Int ! {| r}) -> Int ! {| r}
+//! sig: timed = (Clock) -> Int ! {Clock}
+//! sig: pure_use = () -> Int
+// The `with_retry` problem from RFC 0001 §2: the helper is itself pure
+// and its caller's row stays visible at the call site.
+
+fn with_retry[r](attempts: Int, f: () -> Int ! r) -> Int ! r {
+    if attempts <= 1 { f() } else { with_retry(attempts - 1, f) }
+}
+
+fn timed(c: Clock) -> Int ! {Clock} {
+    with_retry(3, || c.now())
+}
+
+fn pure_use() -> Int {
+    with_retry(3, || 42)
+}
