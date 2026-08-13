@@ -1,0 +1,8 @@
+//! expect: error E0201
+// Instantiating a row variable with {Clock} obliges the caller to declare it.
+
+fn with_retry[r](attempts: Int, f: () -> Int ! r) -> Int ! r { f() }
+
+fn bad(c: Clock) -> Int {
+    with_retry(3, || c.now())
+}
