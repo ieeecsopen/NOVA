@@ -1,0 +1,7 @@
+//! expect: error E0201
+// A function that performs an effect must say so. This is the
+// derivation rule of RFC 0001 §4.3.
+
+fn log_time(c: Clock) -> Int {
+    c.now()
+}
