@@ -1,0 +1,8 @@
+//! expect: error E0203
+// Authority cannot be smuggled past a pure parameter either.
+
+fn run_pure(f: () -> Int) -> Int { f() }
+
+fn attempt(c: Clock) -> Int ! {Clock} {
+    run_pure(|| c.now())
+}
