@@ -1,0 +1,7 @@
+//! expect: error E0202
+// Over-declaring is an error too: NOVA checks equality, not subsumption.
+
+fn ping(c: Clock) -> Bool ! {Clock, Runtime} {
+    c.now();
+    true
+}
