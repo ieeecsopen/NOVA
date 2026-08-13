@@ -1,0 +1,8 @@
+//! expect: error E0201
+// Widening only ever adds. It can never hide an effect.
+
+fn ping(c: Clock, rt: Runtime) -> Bool ! {Clock} = widen {
+    rt.print("x");
+    c.now();
+    true
+}
