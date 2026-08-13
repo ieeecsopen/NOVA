@@ -1,0 +1,7 @@
+//! expect: error E0203
+// The diagnostic that justifies RFC 0001. A closure that captures a
+// capability carries it in its type; it cannot be returned as pure.
+
+fn sneaky(c: Clock) -> (() -> Int) {
+    || c.now()
+}
