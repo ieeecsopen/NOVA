@@ -1,0 +1,10 @@
+//! expect: ok
+//! sig: measure = (Runtime) -> Int ! {Clock, Runtime}
+// Obtaining a Clock from the Runtime performs `Runtime`; using it
+// performs `Clock`. Both appear in the row.
+
+fn measure(rt: Runtime) -> Int ! {Clock, Runtime} {
+    let c = rt.clock();
+    let t0 = c.now();
+    c.now() - t0
+}
