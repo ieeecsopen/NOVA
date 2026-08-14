@@ -1,0 +1,9 @@
+//! expect: ok
+//! sig: shadowed = (Clock) -> Int
+// A lambda parameter shadows an outer capability binding, so the body
+// uses the parameter and the enclosing function stays pure.
+
+fn shadowed(c: Clock) -> Int {
+    let f = |c: Int| c + 1;
+    f(41)
+}
