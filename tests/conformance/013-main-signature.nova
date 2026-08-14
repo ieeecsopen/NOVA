@@ -1,0 +1,6 @@
+//! expect: error E0210
+// The entry point is the only source of authority (RFC 0001 §4.7).
+
+fn main() -> Int {
+    0
+}
