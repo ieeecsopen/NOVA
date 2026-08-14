@@ -1,0 +1,14 @@
+//! expect: ok
+//! stdout: a
+//! stdout: b
+//! exit: 3
+// Rows have no run-time representation. Ordering is ordinary evaluation.
+
+fn emit(rt: Runtime, s: String) -> Int ! {Runtime} {
+    rt.print(s);
+    1
+}
+
+fn main(rt: Runtime) -> Int ! {Runtime} {
+    emit(rt, "a") + emit(rt, "b") + 1
+}
