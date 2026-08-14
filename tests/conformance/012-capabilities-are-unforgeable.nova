@@ -1,0 +1,6 @@
+//! expect: error E0101
+// There is no expression that produces a capability from nothing.
+
+fn steal() -> Int ! {Clock} {
+    Clock.now()
+}
