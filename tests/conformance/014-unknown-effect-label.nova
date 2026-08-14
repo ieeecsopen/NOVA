@@ -1,0 +1,4 @@
+//! expect: error E0103
+// An effect label is a capability type name; there are no free labels.
+
+fn f() -> Int ! {Database} { 0 }
