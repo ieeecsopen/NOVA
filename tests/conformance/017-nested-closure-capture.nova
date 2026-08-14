@@ -1,0 +1,6 @@
+//! expect: error E0203
+// Capture through two levels of closure is still capture.
+
+fn nested(c: Clock) -> (() -> (() -> Int)) {
+    || || c.now()
+}
