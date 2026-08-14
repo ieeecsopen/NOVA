@@ -1,0 +1,3 @@
+//! expect: error E0109
+
+fn f(c: Clock) -> Int ! {Clock} { c.tick() }
