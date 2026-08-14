@@ -1,0 +1,3 @@
+//! expect: error E0200
+
+fn f() -> Int { "not an int" }
