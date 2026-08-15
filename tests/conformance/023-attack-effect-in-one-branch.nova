@@ -1,0 +1,7 @@
+//! expect: error E0201
+// An effect performed on only one path is still in the row. Rows are a
+// may-analysis, not a must-analysis.
+
+fn maybe(c: Clock, b: Bool) -> Int {
+    if b { c.now() } else { 0 }
+}
