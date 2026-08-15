@@ -1,0 +1,11 @@
+//! expect: error E0206
+// Binding the closure to a name first does not erase its row.
+//
+// KNOWN ISSUE: this reports E0206 rather than the more specific E0203,
+// because the blamed expression is the variable `f`, not the lambda.
+// See docs/known-issues.md#d1.
+
+fn launder(c: Clock) -> (() -> Int) {
+    let f = || c.now();
+    f
+}
