@@ -1,0 +1,16 @@
+//! expect: ok
+//! sig: escape = (Clock) -> (() -> Clock)
+// ACCEPTED, and deliberately so.
+//
+// This closure captures `c` but never *uses* it, so its row is empty.
+// Authority is still visible: `Clock` appears in the return type. The
+// caller cannot do anything with the result without incurring `Clock`
+// in its own row.
+//
+// Finding: capability *values* are made visible by ordinary typing.
+// The effect row is only needed for capability *uses*. The two
+// mechanisms cover disjoint cases, which is why RFC 0001 needs both.
+
+fn escape(c: Clock) -> (() -> Clock) {
+    || c
+}
