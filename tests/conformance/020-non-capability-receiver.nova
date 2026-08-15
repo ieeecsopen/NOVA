@@ -1,0 +1,3 @@
+//! expect: error E0108
+
+fn f(n: Int) -> Int { n.now() }
