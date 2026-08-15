@@ -1,0 +1,7 @@
+//! expect: error E0201
+// Discarding the result does not discard the effect.
+
+fn discard(c: Clock) -> Int {
+    c.now();
+    0
+}
