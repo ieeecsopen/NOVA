@@ -1,0 +1,8 @@
+//! expect: error E0100
+// A user program cannot redeclare a prelude capability. The diagnostic
+// must point at both files, which is a regression test for source-map
+// rendering as much as for the rule.
+
+capability Runtime {
+    other() -> Int
+}
