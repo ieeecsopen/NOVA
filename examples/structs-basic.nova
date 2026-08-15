@@ -1,0 +1,22 @@
+// Structs (RFC 0002 §4.1): nominal product types.
+//
+// `Point` and a hypothetical `Meters { x: Int, y: Int }` would have
+// identical fields and remain different types — see TYPE-SYSTEM.md
+// "Nominal vs structural" for why that is the deliberate choice.
+
+struct Point { x: Int, y: Int }
+
+fn manhattan(p: Point) -> Int {
+    p.x + p.y
+}
+
+fn translate(p: Point, dx: Int, dy: Int) -> Point {
+    Point { x: p.x + dx, y: p.y + dy }
+}
+
+fn main(rt: Runtime) -> Int ! {Runtime} {
+    let origin = Point { x: 0, y: 0 };
+    let moved = translate(origin, 3, 4);
+    rt.print("moved a point");
+    manhattan(moved)
+}
