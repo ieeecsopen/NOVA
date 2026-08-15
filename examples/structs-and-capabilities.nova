@@ -1,0 +1,27 @@
+// The example RFC 0002 exists to justify: a struct that bundles
+// capabilities. Building `Handler` (below, in `wrap`) is pure — no
+// effect, because forming a value performs nothing. Using the fields
+// afterward (in `handle`) performs exactly the effects a bare
+// `rt: Runtime, c: Clock` parameter pair would have. This is RFC 0001
+// open question §11.3, answered — see RFC 0002 §3.
+//
+// Note what `wrap` does NOT do: it does not call `rt.clock()` to obtain
+// a fresh `Clock` (that WOULD perform `Runtime`, since asking for a
+// capability is itself an operation — see examples/timing.nova). It is
+// simply handed one, so storing it is free.
+
+struct Handler { rt: Runtime, c: Clock }
+
+fn wrap(rt: Runtime, c: Clock) -> Handler {
+    Handler { rt: rt, c: c }
+}
+
+fn handle(h: Handler, msg: String) -> Int ! {Clock, Runtime} {
+    h.rt.print(msg);
+    h.c.now()
+}
+
+fn main(rt: Runtime) -> Int ! {Clock, Runtime} {
+    let h = wrap(rt, rt.clock());
+    handle(h, "handled via a bundled capability")
+}
