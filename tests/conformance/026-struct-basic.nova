@@ -1,0 +1,6 @@
+//! expect: ok
+//! sig: manhattan = (Point) -> Int
+
+struct Point { x: Int, y: Int }
+
+fn manhattan(p: Point) -> Int { p.x + p.y }
