@@ -1,0 +1,11 @@
+//! expect: ok
+//! sig: describe = (Option[Int]) -> Int
+
+enum Option[T] { Some(T), None }
+
+fn describe(o: Option[Int]) -> Int {
+    match o {
+        Option::Some(n) => n,
+        Option::None => 0,
+    }
+}
