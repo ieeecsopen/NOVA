@@ -1,0 +1,5 @@
+//! expect: error E0220
+enum Option[T] { Some(T), None }
+fn bad(o: Option[Int]) -> Int {
+    match o { Option::Some(n) => n }
+}
