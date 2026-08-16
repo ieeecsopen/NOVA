@@ -1,0 +1,23 @@
+// Enums (RFC 0002 §4.3) and pattern matching (RFC 0002 §5), including
+// checked exhaustiveness: try deleting an arm below and re-running
+// `nova check` to see E0220.
+
+enum Shape {
+    Circle(Int),
+    Rectangle(Int, Int),
+    Triangle(Int, Int),
+}
+
+fn area(s: Shape) -> Int {
+    match s {
+        Shape::Circle(r) => 3 * r * r,
+        Shape::Rectangle(w, h) => w * h,
+        Shape::Triangle(base, height) => (base * height) / 2,
+    }
+}
+
+fn main(rt: Runtime) -> Int ! {Runtime} {
+    rt.print("computing areas");
+    area(Shape::Circle(2)) + area(Shape::Rectangle(3, 4))
+        + area(Shape::Triangle(6, 5))
+}
