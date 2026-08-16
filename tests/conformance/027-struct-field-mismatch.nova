@@ -1,0 +1,3 @@
+//! expect: error E0117
+struct Point { x: Int, y: Int }
+fn bad() -> Point { Point { x: 1 } }
