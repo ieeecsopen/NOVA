@@ -1,0 +1,13 @@
+//! expect: ok
+//! sig: run = (Handler) -> Int ! {Clock}
+// The open question RFC 0001 §11.3 asked: what is the row of a stored
+// capability? Answer, demonstrated here: nothing new. `h.c` is ordinary
+// field-access type resolution; the result has type `Clock`, and the
+// EXISTING capability-use rule fires on `.now()` exactly as if `c` had
+// been a bare parameter. No new rule was needed.
+
+struct Handler { c: Clock }
+
+fn run(h: Handler) -> Int ! {Clock} {
+    h.c.now()
+}
