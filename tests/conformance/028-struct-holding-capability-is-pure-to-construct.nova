@@ -1,0 +1,10 @@
+//! expect: ok
+//! sig: wrap = (Clock) -> Handler
+// RFC 0002 §3: constructing a struct that holds a capability performs
+// no effect. Forming the value is pure, exactly as (Abs) already says
+// for closures (RFC 0001 §4.8) — a capability only enters the row when
+// it is *used*, never when it is merely carried.
+
+struct Handler { c: Clock }
+
+fn wrap(c: Clock) -> Handler { Handler { c: c } }
