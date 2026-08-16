@@ -1,0 +1,21 @@
+// Tuples (RFC 0002 §4.2): the one structural type in NOVA. `.0`, `.1`,
+// ... project by position; no declaration needed.
+//
+// NOVA v0.2 has no pattern-destructuring `let` (only `match` arms take
+// patterns — SYNTAX.md, TYPE-SYSTEM.md); a tuple's components are read
+// with `.0`/`.1` or matched with a `PTuple` pattern in a `match`.
+
+fn swap(p: (Int, Bool)) -> (Bool, Int) {
+    (p.1, p.0)
+}
+
+fn divmod(a: Int, b: Int) -> (Int, Int) {
+    (a / b, a - (a / b) * b)
+}
+
+fn main(rt: Runtime) -> Int ! {Runtime} {
+    let t = swap((5, true));
+    let d = divmod(17, 5);
+    rt.print("computed a quotient and remainder");
+    if t.0 { t.1 + d.0 + d.1 } else { 0 }
+}
