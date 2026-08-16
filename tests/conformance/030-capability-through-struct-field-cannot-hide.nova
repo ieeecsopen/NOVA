@@ -1,0 +1,9 @@
+//! expect: error E0201
+// The same field access, but the enclosing function under-declares —
+// exactly like a bare capability parameter, this is caught.
+
+struct Handler { c: Clock }
+
+fn run(h: Handler) -> Int {
+    h.c.now()
+}
