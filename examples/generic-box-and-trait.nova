@@ -1,0 +1,23 @@
+// A generic struct with a trait implemented for it. RFC 0003 §5 notes a
+// real limitation this example stays within: an `impl` is unconditional
+// -- `impl[T] Labeled for Box` covers every `Box[T]`, but the body
+// cannot itself require `T: Labeled` ("no conditional impls" -- there
+// is no `where T: Labeled` in v0.2).
+
+struct Box[T] { value: T }
+
+trait Labeled { fn label(self) -> String; }
+
+impl[T] Labeled for Box[T] {
+    fn label(self) -> String { "a box" }
+}
+
+fn describe_box[T](rt: Runtime, b: Box[T]) -> Int ! {Runtime} {
+    rt.print(b.label());
+    0
+}
+
+fn main(rt: Runtime) -> Int ! {Runtime} {
+    describe_box(rt, Box { value: 5 });
+    describe_box(rt, Box { value: "text" })
+}
