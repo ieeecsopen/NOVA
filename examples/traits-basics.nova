@@ -1,0 +1,28 @@
+// Traits (RFC 0003 §5): required methods, and one `impl` per (trait,
+// concrete type). Method-call syntax is the SAME syntax as a capability
+// operation (RFC 0002 §6) -- `.show()` here, `.now()` in timing.nova --
+// disambiguated entirely by the receiver's type, not by anything
+// written at the call site.
+
+struct Point { x: Int, y: Int }
+struct Circle { radius: Int }
+
+trait Describe { fn describe(self) -> String; }
+
+impl Describe for Point {
+    fn describe(self) -> String { "a point" }
+}
+
+impl Describe for Circle {
+    fn describe(self) -> String { "a circle" }
+}
+
+fn announce[T: Describe](rt: Runtime, x: T) -> Int ! {Runtime} {
+    rt.print(x.describe());
+    0
+}
+
+fn main(rt: Runtime) -> Int ! {Runtime} {
+    announce(rt, Point { x: 1, y: 2 });
+    announce(rt, Circle { radius: 3 })
+}
