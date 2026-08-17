@@ -1,0 +1,5 @@
+//! expect: ok
+struct Point { x: Int, y: Int }
+trait Show { fn show(self) -> String; }
+impl Show for Point { fn show(self) -> String { "point" } }
+fn describe(p: Point) -> String { p.show() }
