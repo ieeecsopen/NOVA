@@ -1,0 +1,25 @@
+// The "generic collection" example: List[T] (std/list.nova) is a
+// persistent singly linked list, written entirely in ordinary NOVA --
+// pattern matching, recursion, generics -- with no compiler
+// special-casing (DESIGN-PRINCIPLES.md, Standard Library tier).
+// `for` (RFC 0005 §4) walks its Cons/Nil shape directly.
+
+import std.list;
+
+fn double_all(xs: List[Int]) -> List[Int] {
+    match xs {
+        List::Cons(x, rest) => List::Cons(x * 2, double_all(rest)),
+        List::Nil => List::Nil,
+    }
+}
+
+fn main(rt: Runtime) -> Int ! {Runtime} {
+    let xs = prepend(1, prepend(2, prepend(3, empty())));
+    rt.print("built a list");
+    let doubled = double_all(xs);
+    let mut total = 0;
+    for x in doubled {
+        total = total + x;
+    }
+    total + len(xs) + sum(xs)
+}
