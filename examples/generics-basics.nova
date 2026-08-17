@@ -1,0 +1,17 @@
+// Parametric polymorphism (RFC 0003), checked by extending RFC 0001's
+// row-variable machinery to ordinary type variables. Instantiation is
+// always inferred from argument types -- there is no explicit
+// `identity[Int](5)` syntax in v0.2 (RFC 0003 §4).
+
+fn identity[T](x: T) -> T { x }
+
+fn pair[A, B](a: A, b: B) -> (A, B) { (a, b) }
+
+fn first[A, B](p: (A, B)) -> A { p.0 }
+
+fn main(rt: Runtime) -> Int ! {Runtime} {
+    rt.print("generics");
+    let n = identity(5);
+    let p = pair(n, true);
+    first(p) + n
+}
