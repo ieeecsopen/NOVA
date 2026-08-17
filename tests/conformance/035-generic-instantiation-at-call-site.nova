@@ -1,0 +1,8 @@
+//! expect: ok
+//! stdout: ok
+//! exit: 5
+fn identity[T](x: T) -> T { x }
+fn main(rt: Runtime) -> Int ! {Runtime} {
+    rt.print("ok");
+    identity(5)
+}
