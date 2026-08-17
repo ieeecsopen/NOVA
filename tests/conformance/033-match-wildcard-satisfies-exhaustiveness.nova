@@ -1,0 +1,5 @@
+//! expect: ok
+enum Color { Red, Green, Blue }
+fn is_red(c: Color) -> Bool {
+    match c { Color::Red => true, _ => false }
+}
