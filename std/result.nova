@@ -1,0 +1,18 @@
+// Result[T, E]: the two-type-parameter counterpart of Option, for
+// operations that fail with a reason rather than fail silently.
+
+pub enum Result[T, E] { Ok(T), Err(E) }
+
+pub fn unwrap_or[T, E](r: Result[T, E], default: T) -> T {
+    match r {
+        Result::Ok(v) => v,
+        Result::Err(e) => default,
+    }
+}
+
+pub fn is_ok[T, E](r: Result[T, E]) -> Bool {
+    match r {
+        Result::Ok(v) => true,
+        Result::Err(e) => false,
+    }
+}
