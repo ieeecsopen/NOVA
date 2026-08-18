@@ -1,0 +1,14 @@
+// NOVA Core prelude.
+//
+// These capability declarations are implicitly in scope in every program.
+// They declare *types*, never values: the only way to obtain a `Runtime`
+// is to be `main` (RFC 0001 §4.7).
+
+capability Runtime {
+    clock() -> Clock
+    print(line: String) -> Unit
+}
+
+capability Clock {
+    now() -> Int
+}
