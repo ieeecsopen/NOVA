@@ -1,0 +1,29 @@
+// Local mutability and loops (RFC 0005). `mut` locals never escape
+// their frame -- no references exist in NOVA v0.2 -- so this needs no
+// memory model (Constitution Article XI); see RFC 0005 §3 for the full
+// safety argument, and E0130 for the one rule that makes it hold.
+
+fn sum_to(n: Int) -> Int {
+    let mut total = 0;
+    let mut i = 0;
+    while i < n {
+        total = total + i;
+        i = i + 1;
+    }
+    total
+}
+
+fn factorial(n: Int) -> Int {
+    let mut result = 1;
+    let mut i = 1;
+    while i <= n {
+        result = result * i;
+        i = i + 1;
+    }
+    result
+}
+
+fn main(rt: Runtime) -> Int ! {Runtime} {
+    rt.print("looping");
+    sum_to(10) + factorial(5)
+}
