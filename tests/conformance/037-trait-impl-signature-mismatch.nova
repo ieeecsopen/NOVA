@@ -1,0 +1,8 @@
+//! expect: error E0127
+// An impl's written signature must match the trait's declared one — a
+// caller who checked against the trait's contract (the only contract
+// `MethodCall` dispatch ever consults) must not be able to observe a
+// value of a type the impl body never promised.
+struct Point { x: Int }
+trait Show { fn show(self) -> String; }
+impl Show for Point { fn show(self) -> Int { 0 } }
