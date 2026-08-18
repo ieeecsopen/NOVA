@@ -1,0 +1,44 @@
+// List[T]: a persistent (immutable) singly linked list, written entirely
+// in ordinary NOVA — pattern matching, recursion, generics. No compiler
+// special-casing at all (DESIGN-PRINCIPLES.md, Standard Library tier).
+//
+// Persistent rather than mutable is a deliberate choice, not a
+// limitation worked around: NOVA v0.2 has no heap mutation or aliasing
+// (Constitution Article XI, RFC 0005 §1), so a collection that supports
+// in-place update is out of scope until the memory model (Milestone 1)
+// exists. `prepend` is O(1); `append`, `get` and `len` are O(n).
+//
+// `for x in xs { ... }` (RFC 0005 §3) is defined in terms of exactly
+// this type: the reference evaluator walks a `Cons`/`Nil` chain
+// directly, so a `for` loop over any value of type `List[T]` — whether
+// built here or by user code reusing this same enum — works with no
+// further mechanism.
+
+pub enum List[T] { Cons(T, List[T]), Nil }
+
+pub fn empty[T]() -> List[T] { List::Nil }
+
+pub fn prepend[T](x: T, xs: List[T]) -> List[T] {
+    List::Cons(x, xs)
+}
+
+pub fn len[T](xs: List[T]) -> Int {
+    match xs {
+        List::Cons(x, rest) => 1 + len(rest),
+        List::Nil => 0,
+    }
+}
+
+pub fn append[T](xs: List[T], x: T) -> List[T] {
+    match xs {
+        List::Cons(head, rest) => List::Cons(head, append(rest, x)),
+        List::Nil => List::Cons(x, List::Nil),
+    }
+}
+
+pub fn sum(xs: List[Int]) -> Int {
+    match xs {
+        List::Cons(x, rest) => x + sum(rest),
+        List::Nil => 0,
+    }
+}
