@@ -1,0 +1,4 @@
+//! expect: error E0115
+struct Point { x: Int }
+trait Show { fn show(self) -> String; }
+impl Show for Point { }
