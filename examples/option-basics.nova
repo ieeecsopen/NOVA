@@ -1,0 +1,19 @@
+// Option[T] (Constitutional Principle 3: "failure must have explicit
+// semantics") is an ordinary enum in std/option.nova — no compiler
+// magic. `find` below returns `Option::None` instead of a sentinel
+// value or a crash.
+
+import std.option;
+
+fn find(target: Int, a: Int, b: Int, c: Int) -> Option[Int] {
+    if target == a { Option::Some(a) }
+    else if target == b { Option::Some(b) }
+    else if target == c { Option::Some(c) }
+    else { Option::None }
+}
+
+fn main(rt: Runtime) -> Int ! {Runtime} {
+    let found = find(4, 1, 4, 9);
+    rt.print("searched for a value");
+    unwrap_or(found, -1)
+}
