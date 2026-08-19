@@ -1,0 +1,6 @@
+//! expect: error E0126
+fn f() -> Int {
+    let x = 0;
+    x = 1;
+    x
+}
