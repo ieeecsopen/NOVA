@@ -1,0 +1,23 @@
+// Writing new List[T] operations as ordinary user code -- recursion
+// and pattern matching over an imported enum, exactly as
+// std/list.nova's own functions are written (DESIGN-PRINCIPLES.md:
+// nothing about List is compiler magic, so user code extends it the
+// same way the standard library does).
+
+import std.list;
+
+fn count_even(xs: List[Int]) -> Int {
+    match xs {
+        List::Cons(x, rest) => {
+            let r = count_even(rest);
+            if x - (x / 2) * 2 == 0 { r + 1 } else { r }
+        },
+        List::Nil => 0,
+    }
+}
+
+fn main(rt: Runtime) -> Int ! {Runtime} {
+    let xs = prepend(1, prepend(2, prepend(3, prepend(4, empty()))));
+    rt.print("counting evens");
+    count_even(xs) + len(xs)
+}
