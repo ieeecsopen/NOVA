@@ -1,0 +1,25 @@
+// Result[T, E] (std/result.nova) for operations that fail *with a
+// reason*, handled by pattern matching -- no exceptions, no special
+// syntax, just RFC 0002's match over an ordinary enum.
+
+import std.result;
+
+fn safe_div(a: Int, b: Int) -> Result[Int, String] {
+    if b == 0 { Result::Err("division by zero") } else { Result::Ok(a / b) }
+}
+
+fn describe(r: Result[Int, String]) -> String {
+    match r {
+        Result::Ok(v) => "ok",
+        Result::Err(e) => e,
+    }
+}
+
+fn main(rt: Runtime) -> Int ! {Runtime} {
+    rt.print(describe(safe_div(10, 2)));
+    rt.print(describe(safe_div(10, 0)));
+    match safe_div(10, 2) {
+        Result::Ok(v) => v,
+        Result::Err(e) => -1,
+    }
+}
