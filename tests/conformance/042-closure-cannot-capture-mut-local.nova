@@ -1,0 +1,8 @@
+//! expect: error E0130
+// RFC 0005 §4: without this rule, the returned closure and `bad`'s own
+// (already-returned) stack frame would hold two live references to the
+// same mutable cell — the exact aliasing Constitution Article XI forbids.
+fn bad() -> (() -> Int) {
+    let mut x = 0;
+    || x
+}
