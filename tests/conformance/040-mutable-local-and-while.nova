@@ -1,0 +1,16 @@
+//! expect: ok
+//! stdout: summing
+//! exit: 45
+fn sum_to(n: Int) -> Int {
+    let mut total = 0;
+    let mut i = 0;
+    while i < n {
+        total = total + i;
+        i = i + 1;
+    }
+    total
+}
+fn main(rt: Runtime) -> Int ! {Runtime} {
+    rt.print("summing");
+    sum_to(10)
+}
