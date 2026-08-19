@@ -1,0 +1,9 @@
+//! expect: ok
+//! stdout: swapped
+//! exit: 5
+fn swap(p: (Int, Bool)) -> (Bool, Int) { (p.1, p.0) }
+fn main(rt: Runtime) -> Int ! {Runtime} {
+    rt.print("swapped");
+    let t = swap((5, true));
+    if t.0 { t.1 } else { 0 }
+}
