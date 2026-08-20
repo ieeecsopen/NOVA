@@ -1,0 +1,14 @@
+//! expect: ok
+//! stdout: built
+//! exit: 6
+import std.list;
+
+fn main(rt: Runtime) -> Int ! {Runtime} {
+    let xs = prepend(1, prepend(2, prepend(3, empty())));
+    rt.print("built");
+    let mut total = 0;
+    for x in xs {
+        total = total + x;
+    }
+    total
+}
