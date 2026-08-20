@@ -1,0 +1,44 @@
+// A capstone example combining most of Phase 2 in one small, realistic
+// program: capabilities (RFC 0001), a struct bundling them (RFC 0002),
+// an enum-based Result for validation (RFC 0002, std/result.nova), a
+// trait for formatting (RFC 0003), a module import (RFC 0004), and a
+// mutable accumulator with a loop over a generic List (RFC 0005,
+// std/list.nova).
+
+import std.list;
+import std.result;
+
+struct Context { rt: Runtime, c: Clock }
+
+struct Request { path: String, amount: Int }
+
+trait Summarize { fn summarize(self) -> String; }
+
+impl Summarize for Request {
+    fn summarize(self) -> String { self.path }
+}
+
+fn validate(req: Request) -> Result[Request, String] {
+    if req.amount < 0 { Result::Err("negative amount") } else { Result::Ok(req) }
+}
+
+fn handle(ctx: Context, req: Request) -> Int ! {Runtime} {
+    ctx.rt.print(req.summarize());
+    match validate(req) {
+        Result::Ok(valid) => valid.amount,
+        Result::Err(reason) => { ctx.rt.print(reason); 0 },
+    }
+}
+
+fn main(rt: Runtime) -> Int ! {Runtime} {
+    let ctx = Context { rt: rt, c: rt.clock() };
+    let requests = prepend(
+        Request { path: "/orders/1", amount: 10 },
+        prepend(Request { path: "/orders/2", amount: -5 },
+        prepend(Request { path: "/orders/3", amount: 20 }, empty())));
+    let mut total = 0;
+    for req in requests {
+        total = total + handle(ctx, req);
+    }
+    total
+}
