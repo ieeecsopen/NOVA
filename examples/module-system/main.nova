@@ -1,0 +1,12 @@
+// The importing module. `Rectangle` and `area` are visible because
+// `geometry` is `pub` about them and this file imports `geometry`;
+// `validate` is not visible here at all (see rejected.nova in this
+// directory for what that error looks like).
+
+import geometry;
+
+fn main(rt: Runtime) -> Int ! {Runtime} {
+    let r = Rectangle { width: 4, height: 5 };
+    rt.print("computed an area");
+    area(r)
+}
