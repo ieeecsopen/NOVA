@@ -1,0 +1,13 @@
+// A module (RFC 0004): one file, with a real public/private boundary.
+// `area` is `pub` -- visible to anything that `import`s this module.
+// `validate` is a private helper -- visible only within this file.
+
+pub struct Rectangle { width: Int, height: Int }
+
+fn validate(r: Rectangle) -> Bool {
+    r.width > 0 && r.height > 0
+}
+
+pub fn area(r: Rectangle) -> Int {
+    if validate(r) { r.width * r.height } else { 0 }
+}
