@@ -1,0 +1,13 @@
+// NOT compiled by the example suite (no `main`, and it is expected to
+// fail `nova check`). Kept here to show what module-boundary
+// enforcement actually looks like: run
+//
+//     python3 -m verifier.refspec check examples/module-system/rejected.nova
+//
+// to see E0120.
+
+import geometry;
+
+fn use_private() -> Bool {
+    validate(Rectangle { width: 1, height: 1 })
+}
