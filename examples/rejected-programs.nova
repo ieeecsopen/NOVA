@@ -1,0 +1,32 @@
+// A gallery of programs v0.2 rejects, extending examples/authority.nova
+// to the mechanisms this phase added. Every function below is commented
+// out; uncomment one at a time and run `nova check` to see its
+// diagnostic. As shipped, this file compiles.
+
+// error[E0117]: missing field `y`
+// struct Point { x: Int, y: Int }
+// fn bad() -> Point { Point { x: 1 } }
+
+// error[E0220]: non-exhaustive match (missing `None`)
+// enum Option[T] { Some(T), None }
+// fn bad(o: Option[Int]) -> Int { match o { Option::Some(n) => n } }
+
+// error[E0127]: impl signature disagrees with its trait
+// struct P { x: Int }
+// trait Show { fn show(self) -> String; }
+// impl Show for P { fn show(self) -> Int { 0 } }
+
+// error[E0126]: assignment to a non-`mut` binding
+// fn bad() -> Int { let x = 0; x = 1; x }
+
+// error[E0130]: closure captures a `mut` local
+// fn bad() -> (() -> Int) { let mut x = 0; || x }
+
+// This one is fine: an honest, complete program.
+struct Point { x: Int, y: Int }
+fn origin() -> Point { Point { x: 0, y: 0 } }
+
+fn main(rt: Runtime) -> Int ! {Runtime} {
+    rt.print("see the comments in this file");
+    origin().x
+}
