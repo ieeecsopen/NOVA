@@ -1,0 +1,7 @@
+//! expect: ok
+// A single-file stand-in for cross-module visibility: everything
+// declared in one module is visible to itself regardless of `pub`.
+// Cross-module visibility is exercised by tests/manifest and by the
+// module examples under examples/, which use real multiple files.
+pub fn square(x: Int) -> Int { x * x }
+fn use_it() -> Int { square(3) }
