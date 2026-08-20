@@ -1,0 +1,30 @@
+// A small "CLI program". NOVA v0.2 has no real argv/stdin capability
+// yet (Milestone 2's module system exists; a real OS-interaction
+// capability does not) -- so this simulates a fixed command list via
+// std/list.nova rather than reading real input, and is honest about
+// that in this comment rather than pretending otherwise.
+
+import std.list;
+
+enum Command {
+    Add(Int, Int),
+    Greet(String),
+}
+
+fn run(rt: Runtime, cmd: Command) -> Int ! {Runtime} {
+    match cmd {
+        Command::Add(a, b) => { rt.print("add"); a + b },
+        Command::Greet(name) => { rt.print(name); 0 },
+    }
+}
+
+fn main(rt: Runtime) -> Int ! {Runtime} {
+    let commands = prepend(Command::Greet("hello"),
+                    prepend(Command::Add(2, 3),
+                    prepend(Command::Add(10, 20), empty())));
+    let mut total = 0;
+    for cmd in commands {
+        total = total + run(rt, cmd);
+    }
+    total
+}
