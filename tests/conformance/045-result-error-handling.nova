@@ -1,0 +1,15 @@
+//! expect: ok
+//! stdout: ok
+//! exit: 5
+import std.result;
+
+fn safe_div(a: Int, b: Int) -> Result[Int, String] {
+    if b == 0 { Result::Err("division by zero") } else { Result::Ok(a / b) }
+}
+
+fn main(rt: Runtime) -> Int ! {Runtime} {
+    match safe_div(10, 2) {
+        Result::Ok(v) => { rt.print("ok"); v },
+        Result::Err(e) => { rt.print(e); 0 },
+    }
+}
