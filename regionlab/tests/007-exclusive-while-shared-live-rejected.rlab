@@ -1,0 +1,10 @@
+# expect: R1005
+# The fuller reader/writer exclusion MEMORY-MODEL.md §2 states: not just
+# "at most one writer" but "never a writer while a reader is live."
+region r {
+    let x = alloc(r, 5);
+    let s = shared(r);
+    let e = exclusive(r);
+    write(x, 6);
+    0
+}
