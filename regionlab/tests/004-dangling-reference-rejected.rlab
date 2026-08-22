@@ -1,0 +1,11 @@
+# expect: R1001
+# MEMORY-MODEL.md §1: dangling reference. Returning region-allocated
+# data as the region block's own tail value would hand the caller a
+# reference into memory that is about to be freed the instant this
+# block finishes -- rejected before the region is even allowed to close.
+fn main_test() -> Int {
+    let escaped = region r {
+        alloc(r, 5)
+    };
+    0
+}
