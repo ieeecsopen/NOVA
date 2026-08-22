@@ -1,0 +1,7 @@
+# expect: ok
+# Reading only needs a live SHARED capability, not exclusive.
+region r {
+    let x = alloc(r, 5);
+    let s = shared(r);
+    read(x)
+}
