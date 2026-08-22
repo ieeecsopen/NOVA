@@ -1,0 +1,9 @@
+# expect: ok
+# A minimal, correct region program: allocate, hold exclusive access,
+# write, read, all within the region's own scope.
+region r {
+    let x = alloc(r, 5);
+    let e = exclusive(r);
+    write(x, 6);
+    read(x)
+}
