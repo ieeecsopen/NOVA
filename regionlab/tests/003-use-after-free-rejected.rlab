@@ -1,0 +1,11 @@
+# expect: R1002
+# MEMORY-MODEL.md §1: use-after-free. `x` is read after `r` is
+# explicitly closed -- the same check that fires for reading past a
+# region's own lexical scope end, exercised here via an explicit
+# `close` for a sharper, more direct demonstration.
+region r {
+    let x = alloc(r, 5);
+    close(r);
+    let s = shared(r);
+    read(x)
+}
