@@ -1,0 +1,12 @@
+# expect: R1005
+# MEMORY-MODEL.md §1: data races where the model promises race freedom.
+# Two exclusive capabilities for the SAME region, live at the same time,
+# is exactly the aliasing that would let two concurrent writers race --
+# OWNERSHIP-MODEL.md §6 derives Send/Share from this being impossible.
+region r {
+    let x = alloc(r, 5);
+    let e1 = exclusive(r);
+    let e2 = exclusive(r);
+    write(x, 6);
+    0
+}
