@@ -1,0 +1,13 @@
+# expect: R1003
+# MEMORY-MODEL.md §1: double-free. There is no `free` to call twice in
+# NOVA's real design (a region closes exactly once, at scope exit, by
+# construction) -- this test exercises the explicit `close()` escape
+# hatch this prototype provides specifically so double-free has a
+# directly testable shape rather than being "impossible because the
+# syntax doesn't exist," which would be a weaker demonstration.
+region r {
+    let x = alloc(r, 5);
+    close(r);
+    close(r);
+    0
+}
