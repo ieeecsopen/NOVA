@@ -1,0 +1,8 @@
+# expect: ok
+# Ordinary (non-region) function calls are unaffected by any of this --
+# OWNERSHIP-MODEL.md §6, "no new rule needed" for code that never
+# touches a region at all.
+fn double(x: Int) -> Int { x }
+region r {
+    double(5)
+}
