@@ -1,0 +1,16 @@
+# expect: ok
+# Sequential (non-overlapping) exclusive acquisitions are fine -- only
+# SIMULTANEOUS holders are rejected (test 006). The first exclusive
+# capability's scope ends (RAII-style, at its enclosing block's close)
+# before the second is acquired.
+region r {
+    let x = alloc(r, 5);
+    let result = region inner {
+        let e = exclusive(r);
+        write(x, 1);
+        0
+    };
+    let e2 = exclusive(r);
+    write(x, 2);
+    0
+}
