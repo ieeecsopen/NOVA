@@ -1,0 +1,9 @@
+# expect: R1006
+# Mutation requires exclusive access -- a shared (read-only) capability
+# does not authorize a write, per OWNERSHIP-MODEL.md §2's central claim.
+region r {
+    let x = alloc(r, 5);
+    let s = shared(r);
+    write(x, 6);
+    0
+}
