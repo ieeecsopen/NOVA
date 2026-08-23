@@ -1,0 +1,10 @@
+# expect: R1007
+# The direct test of OWNERSHIP-MODEL.md §6's Send/Share derivation:
+# the exclusive capability is linear and cannot be duplicated -- if it
+# could, two "unique" holders would exist, which is the race this whole
+# design exists to prevent.
+region r {
+    let e = exclusive(r);
+    let e2 = copy(e);
+    0
+}
