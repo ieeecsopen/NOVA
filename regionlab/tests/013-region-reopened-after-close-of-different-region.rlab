@@ -1,0 +1,13 @@
+# expect: ok
+# Two independent regions never interfere with each other.
+region r1 {
+    let x = alloc(r1, 1);
+    let e1 = exclusive(r1);
+    write(x, 2);
+    region r2 {
+        let y = alloc(r2, 3);
+        let e2 = exclusive(r2);
+        write(y, 4);
+        0
+    }
+}
