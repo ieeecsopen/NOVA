@@ -1,0 +1,9 @@
+# expect: ok
+# The other half of §6's claim: the SHARED capability is ordinary and
+# freely copyable -- ordinary RFC 0001 capability semantics, unmodified.
+region r {
+    let x = alloc(r, 5);
+    let s = shared(r);
+    let s2 = copy(s);
+    read(x)
+}
