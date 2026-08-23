@@ -1,0 +1,8 @@
+# expect: R1006
+# Allocating data does not, by itself, authorize reading it back --
+# a capability (shared or exclusive) must be separately obtained,
+# exactly as RFC 0001 requires a capability value to perform any effect.
+region r {
+    let x = alloc(r, 5);
+    read(x)
+}
