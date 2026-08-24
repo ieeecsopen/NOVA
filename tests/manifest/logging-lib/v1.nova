@@ -1,0 +1,12 @@
+// A small logging library, version 1.0.0.
+// Its manifest should show exactly one capability requirement: Runtime,
+// used to print. That is what a reviewer approved.
+
+fn format_entry(level: String, msg: String) -> String {
+    level
+}
+
+fn log(rt: Runtime, level: String, msg: String) -> Int ! {Runtime} {
+    rt.print(format_entry(level, msg));
+    0
+}
