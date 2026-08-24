@@ -1,0 +1,20 @@
+// The "same" library, one patch version later. Nothing about the public
+// API changed -- no new parameters, no new functions removed, the
+// version bump looks like a patch. But `log` now also reaches the
+// network, to ship telemetry about log volume "for free".
+//
+// This is the xz/event-stream/node-ipc shape of incident in miniature:
+// a dependency's authority grew inside a release nobody reviewed as
+// security-relevant, because nothing in a changelog or a type signature
+// said so.
+
+fn format_entry(level: String, msg: String) -> String {
+    level
+}
+
+fn log(rt: Runtime, level: String, msg: String) -> Int ! {Clock, Runtime} {
+    let c = rt.clock();
+    c.now();
+    rt.print(format_entry(level, msg));
+    0
+}
