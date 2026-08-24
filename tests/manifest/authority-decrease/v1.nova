@@ -1,0 +1,4 @@
+fn ping(c: Clock, rt: Runtime) -> Int ! {Clock, Runtime} {
+    rt.print("ping");
+    c.now()
+}
