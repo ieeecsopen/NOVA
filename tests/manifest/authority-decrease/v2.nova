@@ -1,0 +1,6 @@
+// Authority DECREASE: the function no longer touches Runtime. Compatible
+// -- any caller that tolerated the old, larger row still tolerates this.
+
+fn ping(c: Clock) -> Int ! {Clock} {
+    c.now()
+}
