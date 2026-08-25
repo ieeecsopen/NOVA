@@ -1,0 +1,6 @@
+// A genuine bug-fix patch: tightened logic, one new pure helper. No
+// capability requirement changed anywhere. The detector must stay quiet.
+
+fn add(a: Int, b: Int) -> Int { a + b + 0 }
+fn double(a: Int) -> Int { add(a, a) }
+fn log(rt: Runtime, msg: String) -> Int ! {Runtime} { rt.print(msg); 0 }
