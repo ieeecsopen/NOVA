@@ -1,0 +1,2 @@
+fn add(a: Int, b: Int) -> Int { a + b }
+fn log(rt: Runtime, msg: String) -> Int ! {Runtime} { rt.print(msg); 0 }
