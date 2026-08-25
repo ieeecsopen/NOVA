@@ -1,0 +1,10 @@
+// A handler that logs a request. Version 1: one capability use.
+
+fn handle(rt: Runtime, req: String) -> Int ! {Runtime} {
+    rt.print(req);
+    0
+}
+
+fn main(rt: Runtime) -> Int ! {Runtime} {
+    handle(rt, "GET /health")
+}
