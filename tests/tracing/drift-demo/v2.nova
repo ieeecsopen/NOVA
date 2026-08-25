@@ -1,0 +1,16 @@
+// Version 2: someone adds a timing measurement around the same handler,
+// for a latency metric. This is exactly the kind of change that a
+// hand-written instrumentation shim requires a matching, easy-to-forget
+// edit for -- and exactly the kind of change a derived trace requires
+// NO edit for, because the tracer never mentions capabilities by name.
+
+fn handle(rt: Runtime, req: String) -> Int ! {Clock, Runtime} {
+    let c = rt.clock();
+    let t0 = c.now();
+    rt.print(req);
+    c.now() - t0
+}
+
+fn main(rt: Runtime) -> Int ! {Clock, Runtime} {
+    handle(rt, "GET /health")
+}
