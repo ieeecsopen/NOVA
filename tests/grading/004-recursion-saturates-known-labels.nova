@@ -1,0 +1,9 @@
+//! grade: count_down = {Clock: *}
+// Recursion makes the count unbounded, but the *label* is still known:
+// this can only ever touch `Clock`, never anything else. That is a
+// genuinely useful (if coarse) bound and is why saturation, not UNKNOWN,
+// is the right answer for recursion.
+
+fn count_down(c: Clock, n: Int) -> Int ! {Clock} {
+    if n <= 0 { c.now() } else { count_down(c, n - 1) }
+}
