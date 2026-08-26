@@ -1,0 +1,9 @@
+//! grade: measure = {Clock: 2, Runtime: 1}
+// Two `c.now()` calls and one `rt.clock()` call: grades add sequentially.
+
+fn measure(rt: Runtime) -> Int ! {Clock, Runtime} {
+    let c = rt.clock();
+    let start = c.now();
+    let end = c.now();
+    end - start
+}
