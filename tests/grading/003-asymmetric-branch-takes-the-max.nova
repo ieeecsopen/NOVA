@@ -1,0 +1,6 @@
+//! grade: two_or_one = {Clock: 2}
+// One branch calls the clock twice, the other once. The sound bound is 2.
+
+fn two_or_one(c: Clock, b: Bool) -> Int ! {Clock} {
+    if b { c.now() + c.now() } else { c.now() }
+}
