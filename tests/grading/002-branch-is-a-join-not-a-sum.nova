@@ -1,0 +1,7 @@
+//! grade: maybe = {Clock: 1}
+// Only one branch of `if` runs. A sound bound is the max across branches,
+// not their sum — otherwise every conditional doubles its own cost.
+
+fn maybe(c: Clock, b: Bool) -> Int ! {Clock} {
+    if b { c.now() } else { c.now() }
+}
