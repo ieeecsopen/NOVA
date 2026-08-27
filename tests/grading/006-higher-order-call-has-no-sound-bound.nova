@@ -1,0 +1,7 @@
+//! grade: run_pure = ?
+// `f` is a value, not a name this pass can look up, so its capability
+// set is invisible to a syntactic pass. `run_pure` is pure by the
+// checker (RFC 0001) -- the checker's answer is the trustworthy one.
+// The grading pass's honest answer is "no sound bound", not "{}".
+
+fn run_pure(f: () -> Int) -> Int { f() }
