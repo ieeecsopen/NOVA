@@ -1,0 +1,23 @@
+//! grade: with_retry = ?
+//! grade: pure_compute = ?
+// THE central finding of experiment 003.
+//
+// `pure_compute` is checked as pure by RFC 0001 (row {} -- verify with
+// `nova check`). But grading cannot see through the row-polymorphic
+// call to `with_retry`, because the pass reasons about *names*, not
+// about the *type-level row variable* `r` that the checker already
+// tracks. Both functions get the honest, sound, but maximally
+// unhelpful answer: no bound at all.
+//
+// This is not a bug. It is the wall predicted by RFC 0001 open
+// question 7: grading needs to be part of the *type* system (grades
+// carried on row variables, resolved at instantiation) to survive
+// row polymorphism. A syntactic afterthought pass cannot do it.
+
+fn with_retry[r](attempts: Int, f: () -> Int ! r) -> Int ! r {
+    if attempts <= 1 { f() } else { with_retry(attempts - 1, f) }
+}
+
+fn pure_compute() -> Int {
+    with_retry(3, || 42)
+}
