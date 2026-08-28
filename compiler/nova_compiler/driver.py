@@ -66,15 +66,16 @@ class NovaCompiler:
         except Exception as ex:
             return None, f"internal compiler error: {ex}"
 
-    def build_file(self, path: str, output_binary: Optional[str] = None, force_clean: bool = False) -> tuple[bool, Optional[str], Optional[CompileMetrics]]:
-        """Build native executable for path."""
+    def build_file(self, path: str, output_binary: Optional[str] = None, force_clean: bool = False, target: str = "native") -> tuple[bool, Optional[str], Optional[CompileMetrics]]:
+        """Build native executable or WASM artifact for path."""
         t_start = time.perf_counter()
 
         if output_binary is None:
             base_name = os.path.splitext(os.path.basename(path))[0]
-            output_binary = os.path.join(".", base_name)
+            ext = ".wasm" if target in ("wasm", "wasi") else ""
+            output_binary = os.path.join(".", f"{base_name}{ext}")
 
-        src_hash = self.compute_hash(path)
+        src_hash = self.compute_hash(path) + f"_{target}"
         cached_bin = os.path.join(self.cache_dir, f"{src_hash}.bin")
 
         if not force_clean and os.path.exists(cached_bin):
@@ -111,7 +112,7 @@ class NovaCompiler:
         mir_mod = lower_hir_to_mir(hir_mod)
 
         t_codegen_start = time.perf_counter()
-        success = compile_to_native(unit.result, cached_bin)
+        success = compile_to_native(unit.result, cached_bin, target=target)
         if not success:
             return False, "error: native clang compilation failed", None
 

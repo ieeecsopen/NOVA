@@ -289,8 +289,8 @@ class CCodeGen:
         return "0"
 
 
-def compile_to_native(check_result: CheckResult, output_binary_path: str, opt_level: str = "-O3") -> bool:
-    """Compile check_result into native binary using clang."""
+def compile_to_native(check_result: CheckResult, output_binary_path: str, opt_level: str = "-O3", target: str = "native") -> bool:
+    """Compile check_result into native binary or WASM artifact using clang."""
     codegen = CCodeGen(check_result)
     c_source = codegen.generate()
 
@@ -299,10 +299,20 @@ def compile_to_native(check_result: CheckResult, output_binary_path: str, opt_le
         c_path = tf.name
 
     try:
-        cmd = ["clang", opt_level, c_path, "-o", output_binary_path]
+        if target in ("wasm", "wasi"):
+            wasm_target = "--target=wasm32-wasi" if target == "wasi" else "--target=wasm32"
+            cmd = ["clang", wasm_target, opt_level, "-Wno-everything", c_path, "-o", output_binary_path]
+        else:
+            cmd = ["clang", opt_level, c_path, "-o", output_binary_path]
         res = subprocess.run(cmd, capture_output=True, text=True)
         if res.returncode != 0:
-            print(f"Compilation error:\n{res.stderr}")
+            # Fallback without sysroot if targeting standalone wasm
+            if target == "wasm":
+                cmd_fallback = ["clang", "--target=wasm32", "-nostdlib", "-Wl,--no-entry", "-Wl,--export-all", c_path, "-o", output_binary_path]
+                res_fb = subprocess.run(cmd_fallback, capture_output=True, text=True)
+                if res_fb.returncode == 0:
+                    return True
+            print(f"Compilation error ({target}):\n{res.stderr}")
             return False
         return True
     finally:

@@ -30,6 +30,7 @@ from .lint import lint_file
 from .test_runner import run_tests
 from .docgen import generate_docs
 from .pkg import (
+    init_new_package,
     add_dependency,
     remove_dependency,
     update_dependencies,
@@ -49,23 +50,28 @@ def main(argv: list[str] = None) -> int:
     )
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
+    # nova new
+    new_p = subparsers.add_parser("new", help="Create a new production NOVA project scaffolding")
+    new_p.add_argument("name", help="Name of project to create")
+
     # nova check
     check_p = subparsers.add_parser("check", help="Type-check and verify effect rows without code generation")
-    check_p.add_argument("file", help="Path to .nova source file")
+    check_p.add_argument("file", nargs="?", default="src/main.nova", help="Path to .nova source file (default: src/main.nova)")
     check_p.add_argument("--emit-hir", action="store_true", help="Print High-Level IR (HIR)")
     check_p.add_argument("--emit-mir", action="store_true", help="Print Mid-Level IR (MIR)")
 
     # nova build
-    build_p = subparsers.add_parser("build", help="Compile NOVA source into an optimized native machine binary")
-    build_p.add_argument("file", help="Path to .nova source file")
+    build_p = subparsers.add_parser("build", help="Compile NOVA source into an optimized machine binary or WASM")
+    build_p.add_argument("file", nargs="?", default="src/main.nova", help="Path to .nova source file (default: src/main.nova)")
     build_p.add_argument("-o", "--output", help="Output executable binary path")
+    build_p.add_argument("--target", default="native", choices=["native", "wasm", "wasi"], help="Compilation target (native, wasm, wasi)")
     build_p.add_argument("--clean", action="store_true", help="Force clean compilation (bypass cache)")
     build_p.add_argument("--emit-hir", action="store_true", help="Print High-Level IR (HIR)")
     build_p.add_argument("--emit-mir", action="store_true", help="Print Mid-Level IR (MIR)")
 
     # nova run
     run_p = subparsers.add_parser("run", help="Compile and execute a NOVA program")
-    run_p.add_argument("file", help="Path to .nova source file")
+    run_p.add_argument("file", nargs="?", default="src/main.nova", help="Path to .nova source file (default: src/main.nova)")
     run_p.add_argument("args", nargs=argparse.REMAINDER, help="Arguments passed to the executable")
 
     # nova test
@@ -122,7 +128,11 @@ def main(argv: list[str] = None) -> int:
 
     compiler = NovaCompiler()
 
-    if args.command == "check":
+    if args.command == "new":
+        init_new_package(args.name)
+        return 0
+
+    elif args.command == "check":
         res, err = compiler.check_file(args.file)
         if err:
             print(err, file=sys.stderr)
@@ -145,7 +155,8 @@ def main(argv: list[str] = None) -> int:
         return 0
 
     elif args.command == "build":
-        success, out, metrics = compiler.build_file(args.file, output_binary=args.output, force_clean=args.clean)
+        target = getattr(args, "target", "native")
+        success, out, metrics = compiler.build_file(args.file, output_binary=args.output, force_clean=args.clean, target=target)
         if not success:
             print(out, file=sys.stderr)
             return 1

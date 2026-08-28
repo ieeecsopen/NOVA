@@ -21,6 +21,70 @@ MANIFEST_FILE = "nova.toml"
 LOCK_FILE = "nova.lock"
 
 
+def init_new_package(pkg_name: str, parent_dir: str = ".") -> bool:
+    """Initialize a brand-new production NOVA application scaffolding."""
+    target_path = os.path.join(parent_dir, pkg_name)
+    os.makedirs(os.path.join(target_path, "src"), exist_ok=True)
+    os.makedirs(os.path.join(target_path, "tests"), exist_ok=True)
+
+    # 1. nova.toml
+    manifest_path = os.path.join(target_path, MANIFEST_FILE)
+    with open(manifest_path, "w", encoding="utf-8") as f:
+        f.write(f"""[package]
+name = "{pkg_name}"
+version = "0.1.0"
+edition = "2026"
+description = "A production application built with NOVA"
+
+[dependencies]
+
+[capabilities]
+allowed = ["Runtime", "Clock", "Filesystem", "Network"]
+""")
+
+    # 2. src/main.nova
+    main_path = os.path.join(target_path, "src", "main.nova")
+    with open(main_path, "w", encoding="utf-8") as f:
+        f.write("""// NOVA Application Entrypoint
+
+fn main(rt: Runtime) -> Int ! {Runtime} {
+    rt.print("Hello from NOVA!");
+    0
+}
+""")
+
+    # 3. tests/test_main.nova
+    test_path = os.path.join(target_path, "tests", "test_main.nova")
+    with open(test_path, "w", encoding="utf-8") as f:
+        f.write("""// NOVA Conformance Test
+
+fn run_test(rt: Runtime) -> Int ! {Runtime} {
+    rt.print("✓ Test passed cleanly");
+    0
+}
+
+fn main(rt: Runtime) -> Int ! {Runtime} {
+    run_test(rt)
+}
+""")
+
+    # 4. .gitignore
+    gi_path = os.path.join(target_path, ".gitignore")
+    with open(gi_path, "w", encoding="utf-8") as f:
+        f.write(""".nova_cache/
+dist/
+bin/
+nova.lock
+""")
+
+    print(f"\033[32m✓\033[0m Created new NOVA project \033[1m{pkg_name}\033[0m")
+    print(f"  • Manifest:    {os.path.join(pkg_name, 'nova.toml')}")
+    print(f"  • Entrypoint:  {os.path.join(pkg_name, 'src', 'main.nova')}")
+    print(f"  • Tests:       {os.path.join(pkg_name, 'tests', 'test_main.nova')}")
+    print(f"\nTo get started:\n  cd {pkg_name}\n  nova run\n")
+    return True
+
+
 def init_manifest_if_missing() -> None:
     if not os.path.exists(MANIFEST_FILE):
         with open(MANIFEST_FILE, "w", encoding="utf-8") as f:
@@ -36,6 +100,7 @@ edition = "2026"
 [capabilities]
 allowed = ["Runtime", "Clock", "Filesystem", "Network"]
 """)
+
 
 
 def add_dependency(pkg_name: str, version: str = "1.0.0", capabilities: list[str] = None) -> bool:
