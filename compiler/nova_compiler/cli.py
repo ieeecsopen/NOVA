@@ -74,6 +74,11 @@ def main(argv: list[str] = None) -> int:
     run_p.add_argument("file", nargs="?", default="src/main.nova", help="Path to .nova source file (default: src/main.nova)")
     run_p.add_argument("args", nargs=argparse.REMAINDER, help="Arguments passed to the executable")
 
+    # nova dev
+    dev_p = subparsers.add_parser("dev", help="Start development mode with instant execution and hot check")
+    dev_p.add_argument("file", nargs="?", default="src/main.nova", help="Path to .nova source file (default: src/main.nova)")
+    dev_p.add_argument("args", nargs=argparse.REMAINDER, help="Arguments passed to the executable")
+
     # nova test
     test_p = subparsers.add_parser("test", help="Run unified test suites")
     test_p.add_argument("pattern", nargs="?", default="", help="Optional test suite filter pattern")
@@ -186,6 +191,10 @@ def main(argv: list[str] = None) -> int:
         return 0
 
     elif args.command == "run":
+        return compiler.run_file(args.file, args=args.args)
+
+    elif args.command == "dev":
+        print(f"\033[1m[nova dev]\033[0m Starting instant execution for \033[36m{args.file}\033[0m...")
         return compiler.run_file(args.file, args=args.args)
 
     elif args.command == "test":
