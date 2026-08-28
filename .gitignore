@@ -4,4 +4,5 @@ target/
 *.wasm
 .nova_cache/
 dist/
+bin/
 nova.lock

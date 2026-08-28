@@ -1,0 +1,11 @@
+// NOVA Standard Library: Capability I/O Helpers
+
+fn print_info(rt: Runtime, msg: String) -> Int ! {Runtime} {
+    rt.print(msg);
+    0
+}
+
+fn print_header(rt: Runtime, title: String) -> Int ! {Runtime} {
+    rt.print("=== " + title + " ===");
+    0
+}

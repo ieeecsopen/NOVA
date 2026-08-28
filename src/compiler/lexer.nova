@@ -1,0 +1,12 @@
+// NOVA Self-Hosted Compiler: Tokenizer & Lexer
+
+struct LexerState {
+    pos: Int,
+    line: Int,
+    col: Int,
+}
+
+fn next_token(rt: Runtime, state: LexerState) -> Int ! {Runtime} {
+    rt.print("Lexing next token from source buffer...");
+    state.pos + 1
+}

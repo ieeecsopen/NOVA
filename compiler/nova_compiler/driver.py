@@ -76,8 +76,16 @@ class NovaCompiler:
         cached_bin = os.path.join(self.cache_dir, f"{src_hash}.bin")
 
         if not force_clean and os.path.exists(cached_bin):
-            shutil.copyfile(cached_bin, output_binary)
-            os.chmod(output_binary, 0o755)
+            if output_binary:
+                out_dir = os.path.dirname(output_binary)
+                if out_dir:
+                    os.makedirs(out_dir, exist_ok=True)
+                shutil.copyfile(cached_bin, output_binary)
+                # Make executable
+                os.chmod(output_binary, 0o755)
+                final_bin = output_binary
+            else:
+                final_bin = cached_bin
             t_end = time.perf_counter()
             metrics = CompileMetrics(
                 source_file=path,
@@ -101,6 +109,9 @@ class NovaCompiler:
         if not success:
             return False, "error: native clang compilation failed", None
 
+        out_dir = os.path.dirname(output_binary)
+        if out_dir:
+            os.makedirs(out_dir, exist_ok=True)
         shutil.copyfile(cached_bin, output_binary)
         os.chmod(output_binary, 0o755)
         t_end = time.perf_counter()

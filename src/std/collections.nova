@@ -1,0 +1,14 @@
+// NOVA Standard Library: Collections & Option/Result Helpers
+
+struct Pair {
+    first: Int,
+    second: Int,
+}
+
+fn make_pair(a: Int, b: Int) -> Pair {
+    Pair { first: a, second: b }
+}
+
+fn pair_sum(p: Pair) -> Int {
+    p.first + p.second
+}

@@ -1,0 +1,11 @@
+// NOVA Self-Hosted Compiler: Recursive-Descent Parser
+
+struct ParserState {
+    token_index: Int,
+    error_count: Int,
+}
+
+fn parse_program(rt: Runtime, state: ParserState) -> Int ! {Runtime} {
+    rt.print("Parsing source AST structures...");
+    state.error_count
+}

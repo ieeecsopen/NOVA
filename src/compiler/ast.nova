@@ -1,0 +1,29 @@
+// NOVA Self-Hosted Compiler: Abstract Syntax Tree Nodes
+
+struct Span {
+    start_line: Int,
+    start_col: Int,
+    end_line: Int,
+    end_col: Int,
+}
+
+struct Token {
+    kind: Int,
+    lexeme: String,
+    span: Span,
+}
+
+struct AstNode {
+    id: Int,
+    kind: Int,
+    span: Span,
+}
+
+fn create_span(sl: Int, sc: Int, el: Int, ec: Int) -> Span {
+    Span {
+        start_line: sl,
+        start_col: sc,
+        end_line: el,
+        end_col: ec,
+    }
+}
