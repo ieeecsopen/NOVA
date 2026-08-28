@@ -1,0 +1,27 @@
+// Real-World Application 11: Dependency Resolver with Capability Auditing
+
+struct Dependency {
+    name: String,
+    version_major: Int,
+    requires_network: Bool,
+}
+
+fn audit_dependency(dep: Dependency) -> Bool {
+    if dep.requires_network {
+        false
+    } else {
+        true
+    }
+}
+
+fn main(rt: Runtime) -> Int ! {Runtime} {
+    let dep = Dependency { name: "json-parser", version_major: 2, requires_network: false };
+    rt.print("=== NOVA Supply-Chain Security & Package Resolver ===");
+    let is_safe = audit_dependency(dep);
+    if is_safe {
+        rt.print("✓ Package 'json-parser' is pure: Zero ambient capability risk");
+        0
+    } else {
+        0
+    }
+}

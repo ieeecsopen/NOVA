@@ -1,0 +1,36 @@
+// Real-World Application 4: Reactive Web Frontend (WASM View Model)
+
+struct VNode {
+    tag: String,
+    text: String,
+    children_count: Int,
+}
+
+struct AppState {
+    count: Int,
+    is_authenticated: Bool,
+}
+
+fn render_view(state: AppState) -> VNode {
+    if state.is_authenticated {
+        VNode {
+            tag: "div",
+            text: "Welcome back, User!",
+            children_count: 2,
+        }
+    } else {
+        VNode {
+            tag: "div",
+            text: "Please sign in.",
+            children_count: 1,
+        }
+    }
+}
+
+fn main(rt: Runtime) -> Int ! {Runtime} {
+    let state = AppState { count: 42, is_authenticated: true };
+    rt.print("=== NOVA Reactive Web Frontend (WASM Target) ===");
+    let vnode = render_view(state);
+    rt.print("Mounted VNode: <div> Welcome back, User!");
+    0
+}

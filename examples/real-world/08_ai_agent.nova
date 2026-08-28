@@ -1,0 +1,32 @@
+// Real-World Application 8: Autonomous AI Agent with Strict Financial Ceilings
+
+struct AgentBudget {
+    max_tokens: Int,
+    max_cost_cents: Int,
+    max_steps: Int,
+}
+
+struct AgentSession {
+    agent_id: Int,
+    tokens_used: Int,
+    budget: AgentBudget,
+}
+
+fn execute_reasoning_step(rt: Runtime, session: AgentSession) -> Int ! {Runtime} {
+    if session.tokens_used < session.budget.max_tokens {
+        rt.print("• Step executed within $0.05 budget envelope");
+        1
+    } else {
+        rt.print("✗ Budget exceeded; halting execution");
+        0
+    }
+}
+
+fn main(rt: Runtime) -> Int ! {Runtime} {
+    let budget = AgentBudget { max_tokens: 10000, max_cost_cents: 5, max_steps: 5 };
+    let session = AgentSession { agent_id: 42, tokens_used: 1250, budget: budget };
+
+    rt.print("=== NOVA Autonomous AI Agent Governor ===");
+    let status = execute_reasoning_step(rt, session);
+    0
+}

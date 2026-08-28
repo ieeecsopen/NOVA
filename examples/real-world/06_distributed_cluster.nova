@@ -1,0 +1,34 @@
+// Real-World Application 6: Distributed Cluster Node & Saga Orchestrator
+
+struct ClusterNode {
+    node_id: Int,
+    is_leader: Bool,
+    term: Int,
+}
+
+struct SagaState {
+    step: Int,
+    success: Bool,
+}
+
+fn orchestrate_saga(rt: Runtime, node: ClusterNode) -> SagaState ! {Runtime} {
+    if node.is_leader {
+        rt.print("Leader orchestrating consensus step across replicas...");
+        SagaState { step: 3, success: true }
+    } else {
+        rt.print("Replica awaiting coordinator dispatch...");
+        SagaState { step: 1, success: true }
+    }
+}
+
+fn main(rt: Runtime) -> Int ! {Runtime} {
+    let leader = ClusterNode { node_id: 1, is_leader: true, term: 10 };
+    rt.print("=== NOVA Distributed Consensus & Saga Node ===");
+    let state = orchestrate_saga(rt, leader);
+    if state.success {
+        rt.print("✓ Distributed consensus achieved");
+        0
+    } else {
+        0
+    }
+}

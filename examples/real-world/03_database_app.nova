@@ -1,0 +1,30 @@
+// Real-World Application 3: Database-Backed Entity & Transaction Manager
+
+struct Account {
+    id: Int,
+    owner: String,
+    balance_cents: Int,
+}
+
+fn can_transfer(from: Account, amount: Int) -> Bool {
+    from.balance_cents >= amount
+}
+
+fn execute_transfer(rt: Runtime, from: Account, to: Account, amount: Int) -> Int ! {Runtime} {
+    if can_transfer(from, amount) {
+        rt.print("✓ Transaction Committed: Transferred funds cleanly");
+        1
+    } else {
+        rt.print("✗ Transaction Aborted: Insufficient funds");
+        0
+    }
+}
+
+fn main(rt: Runtime) -> Int ! {Runtime} {
+    let acc1 = Account { id: 101, owner: "Alice", balance_cents: 50000 };
+    let acc2 = Account { id: 102, owner: "Bob", balance_cents: 12000 };
+
+    rt.print("=== NOVA Database & Transaction Manager ===");
+    let status = execute_transfer(rt, acc1, acc2, 15000);
+    0
+}

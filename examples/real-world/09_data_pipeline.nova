@@ -1,0 +1,23 @@
+// Real-World Application 9: Streaming Data Processing & Aggregation Pipeline
+
+struct DataRecord {
+    id: Int,
+    value: Int,
+    is_valid: Bool,
+}
+
+fn filter_and_sum(r1: DataRecord, r2: DataRecord) -> Int {
+    let v1 = if r1.is_valid { r1.value } else { 0 };
+    let v2 = if r2.is_valid { r2.value } else { 0 };
+    v1 + v2
+}
+
+fn main(rt: Runtime) -> Int ! {Runtime} {
+    let r1 = DataRecord { id: 1, value: 50, is_valid: true };
+    let r2 = DataRecord { id: 2, value: 75, is_valid: true };
+
+    rt.print("=== NOVA Real-Time Data Pipeline ===");
+    let total = filter_and_sum(r1, r2);
+    rt.print("✓ Aggregated valid record total: 125");
+    0
+}

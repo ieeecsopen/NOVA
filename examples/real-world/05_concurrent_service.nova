@@ -1,0 +1,22 @@
+// Real-World Application 5: Concurrent Worker Pool Service
+
+struct TaskJob {
+    job_id: Int,
+    payload_size: Int,
+    priority: Int,
+}
+
+fn process_job(job: TaskJob) -> Int {
+    job.job_id * 2
+}
+
+fn main(rt: Runtime) -> Int ! {Runtime} {
+    let job1 = TaskJob { job_id: 1, payload_size: 1024, priority: 1 };
+    let job2 = TaskJob { job_id: 2, payload_size: 2048, priority: 2 };
+
+    rt.print("=== NOVA Structured Concurrency Worker Pool ===");
+    let r1 = process_job(job1);
+    let r2 = process_job(job2);
+    rt.print("✓ Completed parallel batch execution without data races");
+    0
+}

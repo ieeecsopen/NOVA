@@ -1,0 +1,44 @@
+// Real-World Application 2: High-Performance HTTP REST API Service
+
+struct HttpRequest {
+    method: String,
+    path: String,
+    content_length: Int,
+}
+
+struct HttpResponse {
+    status_code: Int,
+    content_type: String,
+    body: String,
+}
+
+fn handle_route(req: HttpRequest) -> HttpResponse {
+    if req.path == "/health" {
+        HttpResponse {
+            status_code: 200,
+            content_type: "application/json",
+            body: "{\"status\": \"ok\", \"healthy\": true}",
+        }
+    } else {
+        HttpResponse {
+            status_code: 200,
+            content_type: "application/json",
+            body: "{\"users\": [{\"id\": 1, \"name\": \"Hesara\"}]}",
+        }
+    }
+}
+
+fn main(rt: Runtime) -> Int ! {Runtime} {
+    let req = HttpRequest {
+        method: "GET",
+        path: "/api/users",
+        content_length: 0,
+    };
+
+    rt.print("=== NOVA HTTP REST API Gateway ===");
+    rt.print("Incoming Request: GET /api/users");
+    let resp = handle_route(req);
+    rt.print("Response: HTTP 200 application/json");
+    rt.print(resp.body);
+    0
+}
