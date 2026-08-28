@@ -1,0 +1,19 @@
+name: Documentation
+description: Propose improvements, tutorials, or corrections to documentation
+labels: ["type:documentation", "status:ready"]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Documentation Proposal
+      description: What documentation needs to be added, corrected, or clarified?
+    validations:
+      required: true
+  - type: textarea
+    id: target
+    attributes:
+      label: Target Documents
+      description: Specific markdown files in `docs/` or `README.md`.
+      placeholder: "- `docs/language/EFFECT-SYSTEM.md`"
+    validations:
+      required: true

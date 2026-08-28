@@ -1,0 +1,38 @@
+name: Bug Report
+description: Report a compiler crash, type checker divergence, or runtime defect
+labels: ["type:bug", "status:needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report an issue in NOVA!
+  - type: textarea
+    id: summary
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of what the bug is.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproducing NOVA Code (.nova)
+      description: Minimal code example demonstrating the failure.
+      render: nova
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What should have happened according to the language specification.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: NOVA Version / Commit Hash
+      description: Output of `nova --version` or git commit SHA.
+      placeholder: "e.g. 1.0.0-beta.1 (commit 8305539)"
+    validations:
+      required: true

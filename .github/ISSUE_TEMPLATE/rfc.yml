@@ -1,0 +1,32 @@
+name: Request for Comments (RFC)
+description: Propose a language-level syntax, semantic, or architectural modification
+labels: ["type:rfc", "status:needs-design"]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: Brief one-paragraph summary of the proposed change.
+    validations:
+      required: true
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Motivation
+      description: Why is this change necessary? What problems does it solve?
+    validations:
+      required: true
+  - type: textarea
+    id: design
+    attributes:
+      label: Detailed Design
+      description: Syntax examples, typing rules, and operational semantics.
+    validations:
+      required: true
+  - type: textarea
+    id: drawbacks
+    attributes:
+      label: Drawbacks & Alternatives
+      description: What are the trade-offs and alternative approaches considered?
+    validations:
+      required: true

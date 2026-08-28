@@ -1,0 +1,31 @@
+name: Feature Request / Implementation Task
+description: Propose a new feature or track a scheduled implementation task
+labels: ["type:feature", "status:needs-triage"]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary & Motivation
+      description: What capability needs to be added and why it is important.
+    validations:
+      required: true
+  - type: textarea
+    id: spec
+    attributes:
+      label: Specification References
+      description: Links to relevant files in `docs/` or `RFC/`.
+      placeholder: "- `docs/language/TYPE-SYSTEM.md`"
+    validations:
+      required: true
+  - type: textarea
+    id: criteria
+    attributes:
+      label: Acceptance Criteria
+      description: Checklist of requirements for completion.
+      value: |
+        - [ ] Feature implemented matching specification
+        - [ ] Unit & integration tests added in `tests/`
+        - [ ] `./tools/check-all.sh` passes with 0 errors
+        - [ ] Documentation updated
+    validations:
+      required: true

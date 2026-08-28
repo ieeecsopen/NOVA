@@ -1,0 +1,25 @@
+name: Research Investigation
+description: Propose an open-ended exploration, formal analysis, or prototype
+labels: ["type:research", "status:research"]
+body:
+  - type: textarea
+    id: question
+    attributes:
+      label: Research Question
+      description: What specific theoretical or empirical question needs to be investigated?
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context & Prior Art
+      description: Why does NOVA need an answer and what do other languages (Rust, OCaml, Koka) do?
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Expected Deliverables
+      description: Markdown report, empirical benchmark data, prototype in `prototypes/`, or draft RFC.
+    validations:
+      required: true
