@@ -1,0 +1,48 @@
+// NOVA Unified Application Platform Example: Campus Portal
+// Demonstrates shared entities, contracts, capability handling, and workflow execution.
+
+struct Student {
+    id: Int,
+    name: String,
+    credits: Int,
+}
+
+struct CampusEvent {
+    id: Int,
+    title: String,
+    capacity: Int,
+    enrolled: Int,
+}
+
+fn can_enroll(event: CampusEvent) -> Bool {
+    event.enrolled < event.capacity
+}
+
+fn register_student(rt: Runtime, student: Student, event: CampusEvent) -> Int ! {Runtime} {
+    if can_enroll(event) {
+        rt.print("✓ Enrollment successful for student in event");
+        1
+    } else {
+        rt.print("✗ Event is full");
+        0
+    }
+}
+
+fn main(rt: Runtime) -> Int ! {Runtime} {
+    let student = Student {
+        id: 1001,
+        name: "Hesara Perera",
+        credits: 120,
+    };
+
+    let event = CampusEvent {
+        id: 501,
+        title: "Advanced Compiler Design Workshop",
+        capacity: 30,
+        enrolled: 18,
+    };
+
+    rt.print("=== NOVA Unified Campus Platform ===");
+    let status = register_student(rt, student, event);
+    status
+}

@@ -202,8 +202,14 @@ class CCodeGen:
                 lines.append(f"{expr_c};")
 
         if block.tail:
-            res_c = self.gen_expr(block.tail)
-            lines.append(f"return {res_c};")
+            if isinstance(block.tail, a.If):
+                cond = self.gen_expr(block.tail.cond)
+                then_body = self.gen_block_body(block.tail.then) if isinstance(block.tail.then, a.Block) else f"return {self.gen_expr(block.tail.then)};"
+                else_body = self.gen_block_body(block.tail.els) if isinstance(block.tail.els, a.Block) else (f"return {self.gen_expr(block.tail.els)};" if block.tail.els else "return 0;")
+                lines.append(f"if ({cond}) {{\n{then_body}\n    }} else {{\n{else_body}\n    }}")
+            else:
+                res_c = self.gen_expr(block.tail)
+                lines.append(f"return {res_c};")
         else:
             lines.append("return 0;")
 
@@ -265,6 +271,12 @@ class CCodeGen:
         elif isinstance(expr, a.FieldAccess):
             recv_c = self.gen_expr(expr.recv)
             return f"({recv_c}.{expr.field})"
+        elif isinstance(expr, a.StructLit):
+            fld_inits = []
+            for fld_name, fld_expr in expr.fields:
+                fld_val = self.gen_expr(fld_expr)
+                fld_inits.append(f".{fld_name} = {fld_val}")
+            return f"(nova_struct_{expr.name}){{ {', '.join(fld_inits)} }}"
         elif isinstance(expr, a.If):
             cond = self.gen_expr(expr.cond)
             then_c = self.gen_expr(expr.then)
