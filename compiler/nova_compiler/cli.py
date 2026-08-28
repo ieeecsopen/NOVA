@@ -52,12 +52,16 @@ def main(argv: list[str] = None) -> int:
     # nova check
     check_p = subparsers.add_parser("check", help="Type-check and verify effect rows without code generation")
     check_p.add_argument("file", help="Path to .nova source file")
+    check_p.add_argument("--emit-hir", action="store_true", help="Print High-Level IR (HIR)")
+    check_p.add_argument("--emit-mir", action="store_true", help="Print Mid-Level IR (MIR)")
 
     # nova build
     build_p = subparsers.add_parser("build", help="Compile NOVA source into an optimized native machine binary")
     build_p.add_argument("file", help="Path to .nova source file")
     build_p.add_argument("-o", "--output", help="Output executable binary path")
     build_p.add_argument("--clean", action="store_true", help="Force clean compilation (bypass cache)")
+    build_p.add_argument("--emit-hir", action="store_true", help="Print High-Level IR (HIR)")
+    build_p.add_argument("--emit-mir", action="store_true", help="Print Mid-Level IR (MIR)")
 
     # nova run
     run_p = subparsers.add_parser("run", help="Compile and execute a NOVA program")
@@ -123,6 +127,20 @@ def main(argv: list[str] = None) -> int:
         if err:
             print(err, file=sys.stderr)
             return 1
+        if getattr(args, "emit_hir", False) and res:
+            from .hir import lower_ast_to_hir
+            hir_mod = lower_ast_to_hir(res.program.decls, module_name=os.path.splitext(os.path.basename(args.file))[0])
+            print("=== HIGH-LEVEL IR (HIR) ===")
+            for fn in hir_mod.functions:
+                print(f"fn {fn.name}({', '.join(p.name + ': ' + str(p.ty) for p in fn.params)}) -> {fn.return_ty} ! {{{', '.join(fn.effects)}}}")
+        if getattr(args, "emit_mir", False) and res:
+            from .hir import lower_ast_to_hir
+            from .mir import lower_hir_to_mir
+            hir_mod = lower_ast_to_hir(res.program.decls, module_name=os.path.splitext(os.path.basename(args.file))[0])
+            mir_mod = lower_hir_to_mir(hir_mod)
+            print("=== MID-LEVEL IR (MIR) ===")
+            for fn in mir_mod.functions:
+                print(f"mir fn {fn.name}: {len(fn.blocks)} basic block(s), {len(fn.locals)} local(s)")
         print(f"\033[32m✓\033[0m {args.file}: checked ok (all type and capability invariants verified)")
         return 0
 
@@ -131,6 +149,24 @@ def main(argv: list[str] = None) -> int:
         if not success:
             print(out, file=sys.stderr)
             return 1
+        if getattr(args, "emit_hir", False):
+            res, _ = compiler.check_file(args.file)
+            if res:
+                from .hir import lower_ast_to_hir
+                hir_mod = lower_ast_to_hir(res.program.decls, module_name=os.path.splitext(os.path.basename(args.file))[0])
+                print("=== HIGH-LEVEL IR (HIR) ===")
+                for fn in hir_mod.functions:
+                    print(f"fn {fn.name}({', '.join(p.name + ': ' + str(p.ty) for p in fn.params)}) -> {fn.return_ty} ! {{{', '.join(fn.effects)}}}")
+        if getattr(args, "emit_mir", False):
+            res, _ = compiler.check_file(args.file)
+            if res:
+                from .hir import lower_ast_to_hir
+                from .mir import lower_hir_to_mir
+                hir_mod = lower_ast_to_hir(res.program.decls, module_name=os.path.splitext(os.path.basename(args.file))[0])
+                mir_mod = lower_hir_to_mir(hir_mod)
+                print("=== MID-LEVEL IR (MIR) ===")
+                for fn in mir_mod.functions:
+                    print(f"mir fn {fn.name}: {len(fn.blocks)} basic block(s), {len(fn.locals)} local(s)")
         cache_label = "(cached)" if metrics and metrics.is_cached else "(fresh build)"
         print(f"\033[32m✓\033[0m Compiled {args.file} -> \033[1m{out}\033[0m {cache_label}")
         if metrics:

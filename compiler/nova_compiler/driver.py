@@ -19,6 +19,8 @@ from typing import Optional
 from verifier.refspec.check import CheckResult
 from verifier.refspec.diagnostics import Diagnostic
 from verifier.refspec.driver import SourceMap, PRELUDE_PATH, STD_DIR, compile_source, CompilationUnit, run_source
+from .hir import lower_ast_to_hir
+from .mir import lower_hir_to_mir
 from .codegen_c import compile_to_native
 
 
@@ -103,6 +105,10 @@ class NovaCompiler:
         if err or not unit:
             return False, err, None
         t_typecheck_end = time.perf_counter()
+
+        # Lower AST -> HIR -> MIR
+        hir_mod = lower_ast_to_hir(unit.program.decls, module_name=os.path.splitext(os.path.basename(path))[0])
+        mir_mod = lower_hir_to_mir(hir_mod)
 
         t_codegen_start = time.perf_counter()
         success = compile_to_native(unit.result, cached_bin)

@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import Any, Optional
+from .hir import HIRModule, HIRFn, HIRExpr, HIRLiteral, HIRVar, HIRBinary, HIRUnary, HIRCall, HIRBlock, HIRIf, HIRLet, HIRAssign, HIRWhile, HIRExprStmt
 
 
 @dataclass
@@ -152,3 +153,43 @@ class MIRFunction:
 class MIRModule:
     name: str
     functions: list[MIRFunction] = field(default_factory=list)
+
+
+def lower_hir_to_mir(hir_mod: HIRModule) -> MIRModule:
+    """Lower high-level intermediate representation into basic-block CFG MIR."""
+    mir_mod = MIRModule(name=hir_mod.name)
+
+    for h_fn in hir_mod.functions:
+        fn_params = []
+        fn_locals = []
+        for i, p in enumerate(h_fn.params):
+            loc = MIRLocal(id=i, name=p.name, ty_name=str(p.ty) if p.ty else "Int")
+            fn_params.append(loc)
+            fn_locals.append(loc)
+
+        ret_ty_str = str(h_fn.return_ty) if h_fn.return_ty else "Int"
+        mir_fn = MIRFunction(name=h_fn.name, params=fn_params, return_ty=ret_ty_str, locals=fn_locals)
+        entry_bb = mir_fn.add_block()
+
+        # Lower body
+        if isinstance(h_fn.body, HIRBlock):
+            for st in h_fn.body.stmts:
+                if isinstance(st, HIRLet):
+                    loc_id = mir_fn.add_local(st.name, str(st.ty) if st.ty else "Int")
+                    if isinstance(st.init, HIRLiteral):
+                        op = MIRConstant(st.init.value, str(st.ty) if st.ty else "Int")
+                        entry_bb.statements.append(MIRAssign(loc_id, MIRUseRvalue(op)))
+                elif isinstance(st, HIRExprStmt) and isinstance(st.expr, HIRCall):
+                    args_op = [MIRConstant(a.value, "Any") if isinstance(a, HIRLiteral) else MIRUse(0) for a in st.expr.args]
+                    entry_bb.statements.append(MIRAssign(mir_fn.add_local(None, "Unit"), MIRCallRvalue(st.expr.callee, args_op)))
+
+            if h_fn.body.result and isinstance(h_fn.body.result, HIRLiteral):
+                entry_bb.terminator = MIRReturn(MIRConstant(h_fn.body.result.value, ret_ty_str))
+            else:
+                entry_bb.terminator = MIRReturn(MIRConstant(0, ret_ty_str))
+        else:
+            entry_bb.terminator = MIRReturn(MIRConstant(0, ret_ty_str))
+
+        mir_mod.functions.append(mir_fn)
+
+    return mir_mod
