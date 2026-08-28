@@ -1,0 +1,47 @@
+{
+  "name": "nova-lang",
+  "displayName": "NOVA Language Support",
+  "description": "Official VS Code extension for the NOVA programming language with capability-typed effects and native LSP support.",
+  "version": "0.1.0",
+  "publisher": "ieeecsopen",
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Linters",
+    "Formatters"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "nova",
+        "aliases": ["NOVA", "nova"],
+        "extensions": [".nova", ".rlab"],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "nova",
+        "scopeName": "source.nova",
+        "path": "./syntaxes/nova.tmLanguage.json"
+      }
+    ],
+    "commands": [
+      {
+        "command": "nova.run",
+        "title": "NOVA: Run Current File"
+      },
+      {
+        "command": "nova.build",
+        "title": "NOVA: Build Native Executable"
+      },
+      {
+        "command": "nova.check",
+        "title": "NOVA: Type and Effect Check"
+      }
+    ]
+  }
+}

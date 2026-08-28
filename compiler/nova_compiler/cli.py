@@ -1,19 +1,33 @@
 """NOVA Command Line Interface (`nova`).
 
 Commands:
-  nova check <file>      Type and effect check a NOVA program
-  nova build <file>      Compile a NOVA program to a native executable
-  nova run <file>        Compile and immediately run a NOVA program
-  nova bench <file>      Benchmark clean vs incremental compilation and runtime metrics
+  nova check <file>            Type and effect check a NOVA program
+  nova build <file>            Compile a NOVA program to a native executable
+  nova run <file>              Compile and immediately run a NOVA program
+  nova test [pattern]          Run unified conformance and security test suites
+  nova fmt [files...]          Format NOVA source files to canonical style
+  nova lint [files...]         Lint NOVA source files for style and quality
+  nova doc [path]              Generate structured API documentation
+  nova add <pkg> [--caps ...]  Add a dependency to nova.toml with capability bounds
+  nova remove <pkg>            Remove a dependency from nova.toml
+  nova lsp                     Launch the Language Server Protocol (LSP) server
+  nova bench <file>            Benchmark compile time, memory, binary size, and latency
 """
 from __future__ import annotations
 
 import argparse
+import glob
 import os
 import sys
 import time
 
 from .driver import NovaCompiler
+from .fmt import format_file
+from .lint import lint_file
+from .test_runner import run_tests
+from .docgen import generate_docs
+from .pkg import add_dependency, remove_dependency
+from .lsp_server import NovaLSPServer
 
 
 def main(argv: list[str] = None) -> int:
@@ -22,7 +36,7 @@ def main(argv: list[str] = None) -> int:
 
     parser = argparse.ArgumentParser(
         prog="nova",
-        description="NOVA Programming Language Compiler and Toolchain",
+        description="NOVA Developer Toolchain & Native Compiler",
     )
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
@@ -40,6 +54,37 @@ def main(argv: list[str] = None) -> int:
     run_p = subparsers.add_parser("run", help="Compile and execute a NOVA program")
     run_p.add_argument("file", help="Path to .nova source file")
     run_p.add_argument("args", nargs=argparse.REMAINDER, help="Arguments passed to the executable")
+
+    # nova test
+    test_p = subparsers.add_parser("test", help="Run unified test suites")
+    test_p.add_argument("pattern", nargs="?", default="", help="Optional test suite filter pattern")
+
+    # nova fmt
+    fmt_p = subparsers.add_parser("fmt", help="Format source files to canonical style")
+    fmt_p.add_argument("files", nargs="*", default=["examples"], help="Files or directories to format")
+    fmt_p.add_argument("--check", action="store_true", help="Check formatting without writing changes")
+
+    # nova lint
+    lint_p = subparsers.add_parser("lint", help="Lint source files for style and quality warnings")
+    lint_p.add_argument("files", nargs="*", default=["examples"], help="Files or directories to lint")
+
+    # nova doc
+    doc_p = subparsers.add_parser("doc", help="Generate API documentation from source")
+    doc_p.add_argument("path", nargs="?", default="examples", help="Source file or directory")
+    doc_p.add_argument("-o", "--output", default="docs/api", help="Output directory for documentation")
+
+    # nova add
+    add_p = subparsers.add_parser("add", help="Add a dependency with explicit capability bounds")
+    add_p.add_argument("pkg", help="Package name")
+    add_p.add_argument("--version", default="1.0.0", help="Package version")
+    add_p.add_argument("--caps", nargs="*", default=[], help="Allowed capabilities (e.g. Network Filesystem)")
+
+    # nova remove
+    remove_p = subparsers.add_parser("remove", help="Remove a dependency from nova.toml")
+    remove_p.add_argument("pkg", help="Package name")
+
+    # nova lsp
+    subparsers.add_parser("lsp", help="Run Language Server Protocol server over stdio")
 
     # nova bench
     bench_p = subparsers.add_parser("bench", help="Measure compile time, memory, binary size, and runtime")
@@ -75,14 +120,75 @@ def main(argv: list[str] = None) -> int:
     elif args.command == "run":
         return compiler.run_file(args.file, args=args.args)
 
+    elif args.command == "test":
+        return run_tests(args.pattern)
+
+    elif args.command == "fmt":
+        targets = []
+        for f in args.files:
+            if os.path.isfile(f):
+                targets.append(f)
+            elif os.path.isdir(f):
+                for root, _, filenames in os.walk(f):
+                    for fn in filenames:
+                        if fn.endswith(".nova"):
+                            targets.append(os.path.join(root, fn))
+        all_ok = True
+        for t in targets:
+            ok, msg = format_file(t, check_only=args.check)
+            print(f"  {msg}")
+            if not ok:
+                all_ok = False
+        return 0 if all_ok else 1
+
+    elif args.command == "lint":
+        targets = []
+        for f in args.files:
+            if os.path.isfile(f):
+                targets.append(f)
+            elif os.path.isdir(f):
+                for root, _, filenames in os.walk(f):
+                    for fn in filenames:
+                        if fn.endswith(".nova"):
+                            targets.append(os.path.join(root, fn))
+        total_warns = 0
+        for t in targets:
+            warns = lint_file(t)
+            if warns:
+                print(f"\n\033[1m{t}\033[0m:")
+                for w in warns:
+                    total_warns += 1
+                    print(f"  \033[33mwarning[{w.rule}]\033[0m line {w.line}:{w.column}: {w.message}")
+                    if w.suggestion:
+                        print(f"    \033[36m= help:\033[0m {w.suggestion}")
+        if total_warns == 0:
+            print("\033[32m✓\033[0m No lint warnings found across scanned files")
+            return 0
+        else:
+            print(f"\nFound {total_warns} lint warning(s)")
+            return 0
+
+    elif args.command == "doc":
+        generate_docs(args.path, output_dir=args.output)
+        return 0
+
+    elif args.command == "add":
+        add_dependency(args.pkg, version=args.version, capabilities=args.caps)
+        return 0
+
+    elif args.command == "remove":
+        remove_dependency(args.pkg)
+        return 0
+
+    elif args.command == "lsp":
+        server = NovaLSPServer()
+        server.run()
+        return 0
+
     elif args.command == "bench":
         print(f"=== Benchmarking NOVA Compiler: {args.file} ===")
-        
-        # 1. Clean build
         _, _, clean_m = compiler.build_file(args.file, force_clean=True)
-        # 2. Incremental build
         _, _, inc_m = compiler.build_file(args.file, force_clean=False)
-        # 3. Execution time
         t0 = time.perf_counter()
         exit_code = compiler.run_file(args.file)
         t_run = (time.perf_counter() - t0) * 1000.0
