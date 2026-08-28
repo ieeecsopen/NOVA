@@ -3,7 +3,7 @@
 - **Status:** Implemented
 - **Created:** 2026-08-28
 - **Depends on:** RFC 0001, RFC 0002
-- **Tier:** Optional language feature ([DESIGN-PRINCIPLES.md](../DESIGN-PRINCIPLES.md))
+- **Tier:** Optional language feature ([DESIGN-PRINCIPLES.md](../docs/foundation/DESIGN-PRINCIPLES.md))
 
 ## 1. Summary
 

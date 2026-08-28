@@ -100,11 +100,11 @@ re-derive known results or claim them:
 
 | Document | Contents |
 |---|---|
-| [PROBLEM-SPACE.md](PROBLEM-SPACE.md) | 24 problems in modern languages, with prior art, difficulty and impact |
-| [COMPETITIVE-ANALYSIS.md](COMPETITIVE-ANALYSIS.md) | 20 languages and 5 systems compared across 7 dimensions |
-| [RESEARCH.md](RESEARCH.md) | 21 research areas, every finding graded Established → Speculative |
-| [DESIGN-OPPORTUNITIES.md](DESIGN-OPPORTUNITIES.md) | Which separate problems share one mechanism; 5 ranked theses |
-| [NON-GOALS.md](NON-GOALS.md) | What NOVA will not attempt, and why |
+| [PROBLEM-SPACE.md](research/PROBLEM-SPACE.md) | 24 problems in modern languages, with prior art, difficulty and impact |
+| [COMPETITIVE-ANALYSIS.md](research/COMPETITIVE-ANALYSIS.md) | 20 languages and 5 systems compared across 7 dimensions |
+| [RESEARCH.md](research/RESEARCH.md) | 21 research areas, every finding graded Established → Speculative |
+| [DESIGN-OPPORTUNITIES.md](research/DESIGN-OPPORTUNITIES.md) | Which separate problems share one mechanism; 5 ranked theses |
+| [NON-GOALS.md](docs/foundation/NON-GOALS.md) | What NOVA will not attempt, and why |
 
 The review's first result was to **withdraw RFC 0001's novelty claim**:
 Effekt (Brachthäuser et al., OOPSLA 2020) already frames effects as
@@ -116,7 +116,7 @@ Its second result was a thesis: **T1 (one graded row carries every
 non-functional obligation) + T2 (capability-safe, adoptable-one-module-at-
 a-time components)**, adopted in [VISION.md](VISION.md#the-thesis-adopted-2026-08-28-after-phase-0)
 after ranking five candidates in
-[DESIGN-OPPORTUNITIES.md §8](DESIGN-OPPORTUNITIES.md#8-five-candidate-theses-ranked).
+[DESIGN-OPPORTUNITIES.md §8](research/DESIGN-OPPORTUNITIES.md#8-five-candidate-theses-ranked).
 
 Three falsification experiments have since run — cheap tests designed to
 break the thesis before Milestones 2–5 are built on top of it:
@@ -134,11 +134,11 @@ designing syntax:
 
 | Document | Contents |
 |---|---|
-| [LANGUAGE-PHILOSOPHY.md](LANGUAGE-PHILOSOPHY.md) | Precise definitions of value, computation, program, service, agent, resource, capability, effect, constraint, guarantee, uncertainty, execution strategy |
-| [PROGRAM-MODEL.md](PROGRAM-MODEL.md) | The original `Program = Intent + State + ... ` model, challenged and revised |
-| [LANGUAGE-CONSTITUTION.md](LANGUAGE-CONSTITUTION.md) | 12 binding semantic principles, each with a checkable status |
-| [DESIGN-PRINCIPLES.md](DESIGN-PRINCIPLES.md) | The six-tier feature hierarchy (Core / Optional / Stdlib / Tooling / Runtime / Research extension) |
-| [ARCHITECTURAL-GOALS.md](ARCHITECTURAL-GOALS.md) | Six invariants any implementation of NOVA must satisfy |
+| [LANGUAGE-PHILOSOPHY.md](docs/foundation/LANGUAGE-PHILOSOPHY.md) | Precise definitions of value, computation, program, service, agent, resource, capability, effect, constraint, guarantee, uncertainty, execution strategy |
+| [PROGRAM-MODEL.md](docs/foundation/PROGRAM-MODEL.md) | The original `Program = Intent + State + ... ` model, challenged and revised |
+| [LANGUAGE-CONSTITUTION.md](docs/foundation/LANGUAGE-CONSTITUTION.md) | 12 binding semantic principles, each with a checkable status |
+| [DESIGN-PRINCIPLES.md](docs/foundation/DESIGN-PRINCIPLES.md) | The six-tier feature hierarchy (Core / Optional / Stdlib / Tooling / Runtime / Research extension) |
+| [ARCHITECTURAL-GOALS.md](docs/foundation/ARCHITECTURAL-GOALS.md) | Six invariants any implementation of NOVA must satisfy |
 
 The headline result: the original program model listed ten terms as
 independent peers. Phase 1 found four of them
@@ -172,9 +172,9 @@ fn handle(h: Handler, msg: String) -> Int ! {Clock, Runtime} {
 
 | Document | Contents |
 |---|---|
-| [SYNTAX.md](SYNTAX.md) | Syntax principles, grammar, every named ambiguity and its resolution |
-| [TYPE-SYSTEM.md](TYPE-SYSTEM.md) | Nominal vs. structural, inference, variance, generics, coercion |
-| [LANGUAGE-REFERENCE.md](LANGUAGE-REFERENCE.md) | A complete walkthrough, every example real and runnable |
+| [SYNTAX.md](docs/language/SYNTAX.md) | Syntax principles, grammar, every named ambiguity and its resolution |
+| [TYPE-SYSTEM.md](docs/language/TYPE-SYSTEM.md) | Nominal vs. structural, inference, variance, generics, coercion |
+| [LANGUAGE-REFERENCE.md](docs/language/LANGUAGE-REFERENCE.md) | A complete walkthrough, every example real and runnable |
 | [RFC 0002](RFC/0002-structs-tuples-enums-pattern-matching.md)–[0005](RFC/0005-local-mutability-and-loops.md) | Structs/enums, generics/traits, modules, mutability — each with the design argument in full |
 
 Three real bugs were caught and fixed while building this, not after:
@@ -201,9 +201,9 @@ instruction not to assume Rust is optimal.
 
 | Document | Contents |
 |---|---|
-| [MEMORY-MODEL.md](MEMORY-MODEL.md) | The comparison (GC/RC/ARC/ownership/affine/linear/regions/hybrids), scored against NOVA's actual priorities, and the decision |
-| [OWNERSHIP-MODEL.md](OWNERSHIP-MODEL.md) | The mechanism: regions as capabilities, linear exclusive access, no named lifetime syntax anywhere |
-| [SAFETY-GUARANTEES.md](SAFETY-GUARANTEES.md) | Every safety claim at an explicit, honest strength, mapped to a test that would falsify it |
+| [MEMORY-MODEL.md](docs/language/MEMORY-MODEL.md) | The comparison (GC/RC/ARC/ownership/affine/linear/regions/hybrids), scored against NOVA's actual priorities, and the decision |
+| [OWNERSHIP-MODEL.md](docs/language/OWNERSHIP-MODEL.md) | The mechanism: regions as capabilities, linear exclusive access, no named lifetime syntax anywhere |
+| [SAFETY-GUARANTEES.md](research/SAFETY-GUARANTEES.md) | Every safety claim at an explicit, honest strength, mapped to a test that would falsify it |
 | [`regionlab/`](regionlab/) | A small standalone prototype checker — 14 tests, one negative test per required property (use-after-free, double-free, invalid access, dangling references, data races) |
 
 No named lifetime parameter exists anywhere in this design — the direct
@@ -219,7 +219,7 @@ untouched by this phase.
 - [VISION.md](VISION.md) — the long-term thesis, and what NOVA is not.
 - [RFC/0001-core-capability-effects.md](RFC/0001-core-capability-effects.md)
   — the language, its prior art, and its open questions.
-- [ARCHITECTURE.md](ARCHITECTURE.md) — the pipeline and why capability
+- [ARCHITECTURE.md](docs/runtime/ARCHITECTURE.md) — the pipeline and why capability
   reachability is its own pass.
 - [CONTRIBUTING.md](CONTRIBUTING.md) — the most useful thing right now is
   a counterexample to RFC 0001.

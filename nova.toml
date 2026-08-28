@@ -1,0 +1,11 @@
+[package]
+name = "nova-project"
+version = "0.1.0"
+edition = "2026"
+
+[dependencies]
+# Example:
+# analytics = { version = "1.0.0", capabilities = ["Network"] }
+
+[capabilities]
+allowed = ["Runtime", "Clock", "Filesystem", "Network"]

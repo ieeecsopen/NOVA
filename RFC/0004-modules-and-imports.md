@@ -3,7 +3,7 @@
 - **Status:** Implemented
 - **Created:** 2026-08-28
 - **Depends on:** RFC 0001
-- **Tier:** Optional language feature ([DESIGN-PRINCIPLES.md](../DESIGN-PRINCIPLES.md))
+- **Tier:** Optional language feature ([DESIGN-PRINCIPLES.md](../docs/foundation/DESIGN-PRINCIPLES.md))
 
 ## 1. Summary
 
@@ -16,8 +16,8 @@ syntax (`a.b.name`); every declaration lives in one flat, globally
 unique name space, and `pub` is the only thing `import` changes access
 to. §2 argues this narrower scope directly.
 
-This RFC also closes a gap [DESIGN-PRINCIPLES.md](../DESIGN-PRINCIPLES.md)
-and [P14](../PROBLEM-SPACE.md#p14--a-dependency-inherits-all-of-your-authority)
+This RFC also closes a gap [DESIGN-PRINCIPLES.md](../docs/foundation/DESIGN-PRINCIPLES.md)
+and [P14](../research/PROBLEM-SPACE.md#p14--a-dependency-inherits-all-of-your-authority)
 both named as open: [Experiment 001](../docs/experiments/001-capability-manifests.md)'s
 capability manifest used "every function in a file" as a stand-in for "a
 package's public interface," because there was no real notion of public
@@ -29,7 +29,7 @@ The obvious design is qualified paths: `import a.b; a.b.helper()`. NOVA
 v0.2 does **not** do this, for a reason worth stating rather than
 assuming: a real qualified-namespace system needs to answer what happens
 when two *packages* (not yet a NOVA concept — no package manager exists,
-per [NON-GOALS.md §2.6](../NON-GOALS.md#26-a-package-registry)) define
+per [NON-GOALS.md §2.6](../docs/foundation/NON-GOALS.md#26-a-package-registry)) define
 the same path, how aliasing (`import a.b as x;`) interacts with it, and
 how it composes with generics' own `[...]` syntax. None of that can be
 answered honestly before a package manager exists.

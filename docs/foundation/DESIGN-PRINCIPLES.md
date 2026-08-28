@@ -137,7 +137,7 @@ whatever Milestone 3's IR choice happens to enable for free.
 ## Worked classification: twelve items from Phase 0
 
 Concrete enough to be checked, not just described. Drawn from
-[PROBLEM-SPACE.md](../../PROBLEM-SPACE.md) and the experiments.
+[PROBLEM-SPACE.md](../../research/PROBLEM-SPACE.md) and the experiments.
 
 | Item | Tier | Why not one tier up |
 |---|---|---|
@@ -178,5 +178,5 @@ feature forecloses (§8). This hierarchy sharpens both:
    for linear capabilities).
 3. **If it doesn't fit any of the six tiers**, that is evidence the
    feature has not been reduced far enough — revisit
-   [DESIGN-OPPORTUNITIES.md](../../DESIGN-OPPORTUNITIES.md) before writing the
+   [DESIGN-OPPORTUNITIES.md](../../research/DESIGN-OPPORTUNITIES.md) before writing the
    RFC, not after.

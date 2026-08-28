@@ -2,7 +2,7 @@
 
 Tests RFC 0001 [open question 7](../../RFC/0001-core-capability-effects.md#11-open-questions)
 and the core claim of thesis T1
-([DESIGN-OPPORTUNITIES.md §2](../../DESIGN-OPPORTUNITIES.md#2-theme-a--obligations-are-one-mechanism)):
+([DESIGN-OPPORTUNITIES.md §2](../../research/DESIGN-OPPORTUNITIES.md#2-theme-a--obligations-are-one-mechanism)):
 that budgets, retry policy and instrumentation are the *same* effect row
 with a grade attached to each label, and that the ungraded row does not
 foreclose the graded one.

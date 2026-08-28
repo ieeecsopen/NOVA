@@ -28,7 +28,7 @@ any behavior the specification does not define.
 (Milestone 1; Constitution Article XI). v0.1 has no pointers, no mutation
 beyond `let`-shadowing, and no `unsafe`, so nothing in it *can* exhibit
 undefined behavior — which is a fact about the language's current
-poverty, not a guarantee anyone has earned. [RESEARCH.md §R1](../../RESEARCH.md#r1--memory-safety)
+poverty, not a guarantee anyone has earned. [RESEARCH.md §R1](../../research/RESEARCH.md#r1--memory-safety)
 sets the bar this must eventually clear: RustBelt's machine-checked
 soundness proof for Rust.
 
@@ -61,7 +61,7 @@ not documented separately from it.
 `Interpreter` raises Python exceptions for runtime errors (division by
 zero, missing host implementation), which is an implementation detail of
 the reference semantics, not a NOVA-level construct. This is upstream of
-[P10](../../PROBLEM-SPACE.md#p10--failure-semantics-are-untyped) (retry-safety):
+[P10](../../research/PROBLEM-SPACE.md#p10--failure-semantics-are-untyped) (retry-safety):
 a `with_retry` cannot refuse to retry a non-idempotent operation until
 NOVA can say, in types, that an operation *can fail* at all. No RFC yet.
 
@@ -74,7 +74,7 @@ memory model (Principle 1), not a mechanism added beside it.
 
 **Status: not met, vacuously true today** (no concurrency exists to
 violate it). Recorded now specifically to foreclose the failure mode
-[RESEARCH.md §R6](../../RESEARCH.md#r6--concurrency) found repeatedly: Java and
+[RESEARCH.md §R6](../../research/RESEARCH.md#r6--concurrency) found repeatedly: Java and
 Go added concurrency before a race-freedom story and never fully
 recovered; Rust, Pony, Verona, and Swift 6 got the guarantee only where
 it was designed in from the memory model outward. Gated on Milestone 1
@@ -145,10 +145,10 @@ two toolchains.
 **Status: aspirational.** No code generator exists (Milestone 3). The bar
 this sets is the WebAssembly Component Model's formal semantics for
 component boundaries
-([RESEARCH.md §R16](../../RESEARCH.md#r16--webassembly-wasi-and-the-component-model)),
+([RESEARCH.md §R16](../../research/RESEARCH.md#r16--webassembly-wasi-and-the-component-model)),
 which is established, industrially backed, and not NOVA's invention —
 NOVA's commitment is to *target* it rather than a bespoke ABI, per thesis
-T2 ([DESIGN-OPPORTUNITIES.md §4](../../DESIGN-OPPORTUNITIES.md#4-theme-c--boundaries-and-the-adoption-problem)).
+T2 ([DESIGN-OPPORTUNITIES.md §4](../../research/DESIGN-OPPORTUNITIES.md#4-theme-c--boundaries-and-the-adoption-problem)).
 
 ---
 
@@ -199,11 +199,11 @@ flow-safe program. NOVA must never claim, imply, or design as though
 authority" *sounds* like it should prevent a logging library from leaking
 a password, and it does not — the library still holds a `Runtime` and is
 fully entitled to call `print` on whatever string reaches it.
-[DESIGN-OPPORTUNITIES.md §5](../../DESIGN-OPPORTUNITIES.md#5-theme-e--what-does-not-unify)
+[DESIGN-OPPORTUNITIES.md §5](../../research/DESIGN-OPPORTUNITIES.md#5-theme-e--what-does-not-unify)
 found these are dual concerns (one constrains what code may *do*, the
 other what data may *reach*), and thirty years of information-flow-
 control research
-([RESEARCH.md §R14](../../RESEARCH.md#r14--information-flow-and-agent-security))
+([RESEARCH.md §R14](../../research/RESEARCH.md#r14--information-flow-and-agent-security))
 show the hard part — declassification — gets nothing from capabilities.
 This principle exists so the conflation is never made by accident under
 pressure to claim more security than the row provides. Restates
@@ -245,7 +245,7 @@ be checked eventually for cost — attached to every function type and
 derived from context rather than authored by hand; built toward a memory
 model it does not yet have, targeting native code and WebAssembly
 components it does not yet generate, on the thesis that
-[non-functional obligations are one mechanism, not many](../../DESIGN-OPPORTUNITIES.md#8-five-candidate-theses-ranked).
+[non-functional obligations are one mechanism, not many](../../research/DESIGN-OPPORTUNITIES.md#8-five-candidate-theses-ranked).
 
 ## What NOVA is NOT
 

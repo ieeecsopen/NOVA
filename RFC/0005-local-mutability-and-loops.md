@@ -3,7 +3,7 @@
 - **Status:** Implemented
 - **Created:** 2026-08-28
 - **Depends on:** RFC 0001
-- **Tier:** Optional language feature ([DESIGN-PRINCIPLES.md](../DESIGN-PRINCIPLES.md))
+- **Tier:** Optional language feature ([DESIGN-PRINCIPLES.md](../docs/foundation/DESIGN-PRINCIPLES.md))
 
 ## 1. Summary
 
@@ -95,7 +95,7 @@ for the bare-local case — a mutable field is reachable from every copy
 of a struct value, which is not (in general) confined to one call frame.
 This is why NOVA's collections (`std/list.nova`) are **persistent**
 (functional/immutable), not mutable — see TYPE-SYSTEM.md and
-[LANGUAGE-PHILOSOPHY.md entry 6](../LANGUAGE-PHILOSOPHY.md#6-resource)
+[LANGUAGE-PHILOSOPHY.md entry 6](../docs/foundation/LANGUAGE-PHILOSOPHY.md#6-resource)
 for why this is a deliberate design, not an oversight.
 
 ## 4. Design: loops

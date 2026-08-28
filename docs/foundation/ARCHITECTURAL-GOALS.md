@@ -1,6 +1,6 @@
 # NOVA — Architectural Goals
 
-Phase 1 output. **This document is not [ARCHITECTURE.md](../../ARCHITECTURE.md).**
+Phase 1 output. **This document is not [ARCHITECTURE.md](../runtime/ARCHITECTURE.md).**
 That document describes the compiler pipeline that exists *today* — lex,
 parse, resolve, check, and the reference/Rust split. This document states
 the invariants that must hold of **any** implementation of NOVA, present
@@ -23,7 +23,7 @@ same type must mean the same values, regardless of target. This is
 Constitutional Principle 8 restated as an architectural obligation on the
 compiler and runtime rather than a promise about the language.
 
-**Why.** [RESEARCH.md §R16](../../RESEARCH.md#r16--webassembly-wasi-and-the-component-model)
+**Why.** [RESEARCH.md §R16](../../research/RESEARCH.md#r16--webassembly-wasi-and-the-component-model)
 found the WebAssembly Component Model already provides a formally
 specified capability boundary (WIT, the canonical ABI); thesis T2 commits
 NOVA to targeting it rather than a bespoke ABI. A bespoke ABI would make
@@ -52,8 +52,8 @@ its first implementation, so that an editor-integration tool (LSP,
 formatter) can share the compiler's actual analysis rather than
 reimplementing it.
 
-**Why.** [RESEARCH.md §R17](../../RESEARCH.md#r17--incremental-compilation) and
-[COMPETITIVE-ANALYSIS.md §6](../../COMPETITIVE-ANALYSIS.md#6-compilation-ir-and-tooling)
+**Why.** [RESEARCH.md §R17](../../research/RESEARCH.md#r17--incremental-compilation) and
+[COMPETITIVE-ANALYSIS.md §6](../../research/COMPETITIVE-ANALYSIS.md#6-compilation-ir-and-tooling)
 both single out the same cautionary tale: rustc shipped as a batch
 pipeline, rust-analyzer had to be built as a second front end to get
 incremental, error-tolerant analysis, and the two now drift and duplicate
@@ -63,7 +63,7 @@ between "batch compiler" and "IDE support" after the fact — the choice is
 made now, before there is a second front end to build.
 
 **Status.** Already recorded as binding in
-[ARCHITECTURE.md](../../ARCHITECTURE.md#design-constraints-on-the-compiler-for-when-it-is-written);
+[ARCHITECTURE.md](../runtime/ARCHITECTURE.md#design-constraints-on-the-compiler-for-when-it-is-written);
 this document elevates it from an implementation note to a goal any
 future rewrite must also satisfy, because it is expensive specifically
 to retrofit (same shape of argument as Constitution Article IV, applied
@@ -82,7 +82,7 @@ fragment of the language (today: nothing; eventually: FFI, and per RFC
 0001 §4.6, attenuation) must be enumerable by tooling across an entire
 dependency graph, not merely visible at each individual site.
 
-**Why.** [PROBLEM-SPACE.md P2](../../PROBLEM-SPACE.md#p2--escape-hatches-are-unbounded-and-unaudited)
+**Why.** [PROBLEM-SPACE.md P2](../../research/PROBLEM-SPACE.md#p2--escape-hatches-are-unbounded-and-unaudited)
 found that Rust's `unsafe` is visible per-block but not summable across a
 dependency graph — nobody computes the total trusted surface of a real
 program, because no tool is positioned to. [SECURITY.md](../../SECURITY.md)
@@ -137,7 +137,7 @@ codebase one module at a time, without any boundary crossing that is
 equivalent of an untyped C FFI escape that silently grants full ambient
 authority to foreign code.
 
-**Why.** [PROBLEM-SPACE.md P24](../../PROBLEM-SPACE.md#p24--new-languages-cannot-incrementally-take-over-a-codebase)
+**Why.** [PROBLEM-SPACE.md P24](../../research/PROBLEM-SPACE.md#p24--new-languages-cannot-incrementally-take-over-a-codebase)
 identifies incremental adoptability as the axis most language projects
 actually die on, independent of technical merit — TypeScript won this way
 and Ur/Web/Links, technically excellent, did not.
@@ -186,6 +186,6 @@ justification is self-hosting rather than the milestone's own goal.
 - [DESIGN-PRINCIPLES.md](DESIGN-PRINCIPLES.md)'s tiers classify
   *features*; these six goals constrain the *system* those features are
   built inside of, regardless of which tier a given feature sits in.
-- [ARCHITECTURE.md](../../ARCHITECTURE.md) is the current, concrete attempt to
+- [ARCHITECTURE.md](../runtime/ARCHITECTURE.md) is the current, concrete attempt to
   satisfy these goals. When the two disagree, this document wins and
   ARCHITECTURE.md needs an update — not the reverse.

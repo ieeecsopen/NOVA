@@ -38,13 +38,13 @@ Program = Intent
         + Verification
 ```
 
-**Superseded 2026-08-28 by [PROGRAM-MODEL.md](PROGRAM-MODEL.md)**, per
+**Superseded 2026-08-28 by [PROGRAM-MODEL.md](docs/foundation/PROGRAM-MODEL.md)**, per
 Phase 1's explicit mandate to challenge this model. That document found
 four of the ten terms above (`Capabilities`, `Effects`, `Resources`, and
 part of `Constraints`) are not independent — they are one mechanism (a
 row) examined at increasing precision — and that `Verification` is not a
 peer ingredient but an axis on `Constraints` (see the Guarantee ladder,
-[LANGUAGE-PHILOSOPHY.md entry 10](LANGUAGE-PHILOSOPHY.md#10-guarantee)).
+[LANGUAGE-PHILOSOPHY.md entry 10](docs/foundation/LANGUAGE-PHILOSOPHY.md#10-guarantee)).
 `Uncertainty` is demoted to a property of values, not programs.
 `Execution Strategy` is kept only as an explicitly open, ungated slot.
 The revised model:
@@ -60,7 +60,7 @@ Program = Intent
         + [Execution Strategy: an open, ungated slot]
 ```
 
-See [PROGRAM-MODEL.md](PROGRAM-MODEL.md) for the full argument and
+See [PROGRAM-MODEL.md](docs/foundation/PROGRAM-MODEL.md) for the full argument and
 [docs/constitution-changelog.md](docs/constitution-changelog.md) for the
 record of this amendment. This remains a research agenda, not a v1
 feature list: most terms are still not defined with enough precision to
@@ -184,12 +184,12 @@ assume unrestricted aliasing or garbage collection. In practice: no
 implicit sharing in the surface language, no cyclic data in the v0 core,
 and no library API whose contract would break under affine typing.
 
-**Memory discipline is now designed** — [MEMORY-MODEL.md](MEMORY-MODEL.md),
-[OWNERSHIP-MODEL.md](OWNERSHIP-MODEL.md), region-based ownership with
+**Memory discipline is now designed** — [MEMORY-MODEL.md](docs/language/MEMORY-MODEL.md),
+[OWNERSHIP-MODEL.md](docs/language/OWNERSHIP-MODEL.md), region-based ownership with
 linear exclusive-access capabilities — and satisfies this Article's
 constraint by construction: no garbage collection, and aliasing is
 checked rather than assumed away
-([SAFETY-GUARANTEES.md](SAFETY-GUARANTEES.md)). This Article's
+([SAFETY-GUARANTEES.md](research/SAFETY-GUARANTEES.md)). This Article's
 restriction remains binding on anything the memory model itself does
 not yet cover (§7 of OWNERSHIP-MODEL.md's open questions).
 

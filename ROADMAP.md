@@ -8,11 +8,11 @@ is done when its exit criteria are met, not when a date arrives.
 **Question:** what are the real unsolved problems, and which of them share
 a mechanism?
 
-- [x] [PROBLEM-SPACE.md](PROBLEM-SPACE.md) — 24 problems, assessed
-- [x] [COMPETITIVE-ANALYSIS.md](COMPETITIVE-ANALYSIS.md) — 20 languages, 5 systems
-- [x] [RESEARCH.md](RESEARCH.md) — 21 areas, findings graded by maturity
-- [x] [DESIGN-OPPORTUNITIES.md](DESIGN-OPPORTUNITIES.md) — themes and 5 ranked theses
-- [x] [NON-GOALS.md](NON-GOALS.md) — what NOVA will not attempt
+- [x] [PROBLEM-SPACE.md](research/PROBLEM-SPACE.md) — 24 problems, assessed
+- [x] [COMPETITIVE-ANALYSIS.md](research/COMPETITIVE-ANALYSIS.md) — 20 languages, 5 systems
+- [x] [RESEARCH.md](research/RESEARCH.md) — 21 areas, findings graded by maturity
+- [x] [DESIGN-OPPORTUNITIES.md](research/DESIGN-OPPORTUNITIES.md) — themes and 5 ranked theses
+- [x] [NON-GOALS.md](docs/foundation/NON-GOALS.md) — what NOVA will not attempt
 
 **Outputs that changed existing work:**
 
@@ -41,22 +41,22 @@ a mechanism?
 **Question:** what does NOVA fundamentally believe, independent of
 syntax?
 
-- [x] [LANGUAGE-PHILOSOPHY.md](LANGUAGE-PHILOSOPHY.md) — 12 term definitions
-- [x] [PROGRAM-MODEL.md](PROGRAM-MODEL.md) — the program model, challenged and revised
-- [x] [LANGUAGE-CONSTITUTION.md](LANGUAGE-CONSTITUTION.md) — 12 semantic principles, each with a checkable status
-- [x] [DESIGN-PRINCIPLES.md](DESIGN-PRINCIPLES.md) — the six-tier feature hierarchy
-- [x] [ARCHITECTURAL-GOALS.md](ARCHITECTURAL-GOALS.md) — six implementation invariants
+- [x] [LANGUAGE-PHILOSOPHY.md](docs/foundation/LANGUAGE-PHILOSOPHY.md) — 12 term definitions
+- [x] [PROGRAM-MODEL.md](docs/foundation/PROGRAM-MODEL.md) — the program model, challenged and revised
+- [x] [LANGUAGE-CONSTITUTION.md](docs/foundation/LANGUAGE-CONSTITUTION.md) — 12 semantic principles, each with a checkable status
+- [x] [DESIGN-PRINCIPLES.md](docs/foundation/DESIGN-PRINCIPLES.md) — the six-tier feature hierarchy
+- [x] [ARCHITECTURAL-GOALS.md](docs/foundation/ARCHITECTURAL-GOALS.md) — six implementation invariants
 - [x] [CONSTITUTION.md](CONSTITUTION.md) Article II amended to the revised model (non-breaking: RFC 0001 and the conformance suite unaffected)
 
 **What Phase 1 leaves open, for the maintainer or a future RFC:**
 
 - Whether retry-safety labels (P10) belong in the standard library or
-  require a type-system change — [DESIGN-PRINCIPLES.md](DESIGN-PRINCIPLES.md#worked-classification-twelve-items-from-phase-0)
+  require a type-system change — [DESIGN-PRINCIPLES.md](docs/foundation/DESIGN-PRINCIPLES.md#worked-classification-twelve-items-from-phase-0)
   records this as genuinely undecided rather than forcing a tier.
 - No syntax has been designed for anything in this phase, per its scope.
   Phase 2 (not yet started) is where surface syntax begins, gated by
-  [DESIGN-PRINCIPLES.md](DESIGN-PRINCIPLES.md)'s hierarchy and
-  [LANGUAGE-CONSTITUTION.md](LANGUAGE-CONSTITUTION.md)'s principles.
+  [DESIGN-PRINCIPLES.md](docs/foundation/DESIGN-PRINCIPLES.md)'s hierarchy and
+  [LANGUAGE-CONSTITUTION.md](docs/foundation/LANGUAGE-CONSTITUTION.md)'s principles.
 
 ## Phase 2 — Core Language *(complete)*
 
@@ -70,8 +70,8 @@ without contradicting anything Phases 0–1 established?
 - [x] [RFC 0004](RFC/0004-modules-and-imports.md) — modules and imports
 - [x] [RFC 0005](RFC/0005-local-mutability-and-loops.md) — local
       mutability and loops, safe without a memory model
-- [x] [SYNTAX.md](SYNTAX.md), [TYPE-SYSTEM.md](TYPE-SYSTEM.md),
-      [LANGUAGE-REFERENCE.md](LANGUAGE-REFERENCE.md)
+- [x] [SYNTAX.md](docs/language/SYNTAX.md), [TYPE-SYSTEM.md](docs/language/TYPE-SYSTEM.md),
+      [LANGUAGE-REFERENCE.md](docs/language/LANGUAGE-REFERENCE.md)
 - [x] The reference implementation extended end to end (lexer through
       evaluator) — every example below actually runs, not just parses
 - [x] `std/option.nova`, `std/result.nova`, `std/list.nova` — written in
@@ -107,18 +107,18 @@ without contradicting anything Phases 0–1 established?
 
 **Question:** how does NOVA manage memory, and does the answer force a
 redesign of RFC 0001's capability system, as
-[DESIGN-OPPORTUNITIES.md Theme B](DESIGN-OPPORTUNITIES.md#3-theme-b--ownership-scope-and-lifetime-are-one-mechanism)
+[DESIGN-OPPORTUNITIES.md Theme B](research/DESIGN-OPPORTUNITIES.md#3-theme-b--ownership-scope-and-lifetime-are-one-mechanism)
 warned it might?
 
-- [x] [MEMORY-MODEL.md](MEMORY-MODEL.md) — GC, RC, ARC, ownership +
+- [x] [MEMORY-MODEL.md](docs/language/MEMORY-MODEL.md) — GC, RC, ARC, ownership +
       borrowing, affine types, linear types, regions, and hybrids,
       compared against Rust specifically and scored against NOVA's own
       priorities, not assumed in advance
-- [x] [OWNERSHIP-MODEL.md](OWNERSHIP-MODEL.md) — regions as capabilities,
+- [x] [OWNERSHIP-MODEL.md](docs/language/OWNERSHIP-MODEL.md) — regions as capabilities,
       linear exclusive-access, no named lifetime syntax
-- [x] [TYPE-SYSTEM.md](TYPE-SYSTEM.md) §§11–14 — ownership types,
+- [x] [TYPE-SYSTEM.md](docs/language/TYPE-SYSTEM.md) §§11–14 — ownership types,
       mutability, Send/Share, aliasing, extending Phase 2's document
-- [x] [SAFETY-GUARANTEES.md](SAFETY-GUARANTEES.md) — every claim at an
+- [x] [SAFETY-GUARANTEES.md](research/SAFETY-GUARANTEES.md) — every claim at an
       explicit Guarantee-ladder strength, mapped to a named test
 - [x] [`regionlab/`](regionlab/) — a small standalone prototype checker,
       14 tests, including a negative test for every required property
@@ -140,7 +140,7 @@ an existing one.
 - `regionlab` is a prototype, not an integration — Phase 2's shipped
   v0.2 checker and its 45 conformance tests are untouched by this phase.
 - Five open questions in
-  [OWNERSHIP-MODEL.md §7](OWNERSHIP-MODEL.md#7-open-questions): field-level
+  [OWNERSHIP-MODEL.md §7](docs/language/OWNERSHIP-MODEL.md#7-open-questions): field-level
   exclusivity splitting, region resizing, generics over region-ness,
   interaction with graded rows, non-lexical region inference.
 - No second independent implementation yet (Constitution Article IX) —
@@ -173,16 +173,16 @@ that choice break the effect model?
 
 **Answered:** region-based ownership, with linearity applied to
 exclusive-region-access capabilities only —
-[MEMORY-MODEL.md](MEMORY-MODEL.md) (research and decision),
-[OWNERSHIP-MODEL.md](OWNERSHIP-MODEL.md) (mechanism),
-[SAFETY-GUARANTEES.md](SAFETY-GUARANTEES.md) (precise, tested claims),
+[MEMORY-MODEL.md](docs/language/MEMORY-MODEL.md) (research and decision),
+[OWNERSHIP-MODEL.md](docs/language/OWNERSHIP-MODEL.md) (mechanism),
+[SAFETY-GUARANTEES.md](research/SAFETY-GUARANTEES.md) (precise, tested claims),
 validated in [`regionlab/`](regionlab/) — a small standalone prototype
 checker, not merged into `verifier/refspec/`, with negative tests for
 every required property.
 
 **Does not break the effect model:** RFC 0001's derivation rule needed
 no revision — see the RFC's own Revisions section and
-[DESIGN-OPPORTUNITIES.md Theme B](DESIGN-OPPORTUNITIES.md#3-theme-b--ownership-scope-and-lifetime-are-one-mechanism)'s
+[DESIGN-OPPORTUNITIES.md Theme B](research/DESIGN-OPPORTUNITIES.md#3-theme-b--ownership-scope-and-lifetime-are-one-mechanism)'s
 resolution note. Constitution Article XI is now satisfied by
 construction, not merely respected by omission.
 
@@ -192,7 +192,7 @@ construction, not merely respected by omission.
   (`regionlab` is deliberately separate; Phase 2's 45 conformance tests
   and 24 examples are unmodified by this phase).
 - The five open questions in
-  [OWNERSHIP-MODEL.md §7](OWNERSHIP-MODEL.md#7-open-questions):
+  [OWNERSHIP-MODEL.md §7](docs/language/OWNERSHIP-MODEL.md#7-open-questions):
   field-level exclusivity splitting, region resizing, generics over
   region-ness, interaction with graded rows, non-lexical region
   inference.

@@ -19,7 +19,7 @@ The brief for this phase was explicit: *challenge this model. It may be
 wrong. Improve it where research shows a better abstraction.* This
 document does that, using [LANGUAGE-PHILOSOPHY.md](LANGUAGE-PHILOSOPHY.md)'s
 definitions and the Phase 0 findings in
-[DESIGN-OPPORTUNITIES.md](../../DESIGN-OPPORTUNITIES.md). It ends with a revised
+[DESIGN-OPPORTUNITIES.md](../../research/DESIGN-OPPORTUNITIES.md). It ends with a revised
 model and a concrete reconciliation with what actually exists today.
 
 ---
@@ -43,7 +43,7 @@ this document.
 ## 2. The four terms that collapse into one (Theme A)
 
 **Capabilities, Effects, and Resources are listed as three independent
-peers.** [DESIGN-OPPORTUNITIES.md §2](../../DESIGN-OPPORTUNITIES.md#2-theme-a--obligations-are-one-mechanism)
+peers.** [DESIGN-OPPORTUNITIES.md §2](../../research/DESIGN-OPPORTUNITIES.md#2-theme-a--obligations-are-one-mechanism)
 found, and [Experiments 001–003](../experiments) then tested, that
 they are not independent:
 
@@ -59,7 +59,7 @@ RFC 0001), naturally-graded (a count — proposed, Milestone 5), and, if a
 property lattice is added, policy-graded (idempotence, commutativity —
 P10). **Constraints** (entry 9) is the genus that contains all three
 levels, plus refinements, which do *not* reduce to the row
-([Theme E](../../DESIGN-OPPORTUNITIES.md#5-theme-e--what-does-not-unify)).
+([Theme E](../../research/DESIGN-OPPORTUNITIES.md#5-theme-e--what-does-not-unify)).
 
 So the "+" between Capabilities, Effects, Resources, and (partly)
 Constraints is not addition of independent ingredients. It is one
@@ -97,8 +97,8 @@ express.
 `Uncertainty` sits at the same level as `State` and `Effects` in the
 original list, suggesting it is a property of *programs*. Everything
 Phase 0 found about it —
-[RESEARCH.md §R10](../../RESEARCH.md#r10--uncertainty),
-[PROBLEM-SPACE.md P18](../../PROBLEM-SPACE.md#p18--uncertainty-and-approximation-are-untyped) —
+[RESEARCH.md §R10](../../research/RESEARCH.md#r10--uncertainty),
+[PROBLEM-SPACE.md P18](../../research/PROBLEM-SPACE.md#p18--uncertainty-and-approximation-are-untyped) —
 says it is a property of **values**: a sensor reading, a model output, a
 float accumulation. `Uncertain[T]` (Bornholt et al. 2014) is a generic
 type over ordinary data, not a control or authority mechanism, and
@@ -118,7 +118,7 @@ NOVA has generics to express either.
 
 Constitution Article VIII already warns against shipping syntax for a
 category with no semantics. `Execution Strategy` is that category today.
-[RESEARCH.md §R20](../../RESEARCH.md#r20--adaptive-and-self-optimising-software)
+[RESEARCH.md §R20](../../research/RESEARCH.md#r20--adaptive-and-self-optimising-software)
 found exactly one working precedent (Halide) confined to one domain
 (array pipelines) after thirteen years of trying to generalize it. Listed
 as a coequal "+" term, `Execution Strategy` visually claims the same
@@ -138,8 +138,8 @@ the original implied more design maturity than exists.
 ## 6. Intent: the one term Phase 0 has nothing to say about, honestly
 
 `Intent` never appears as a researched concept anywhere in
-[PROBLEM-SPACE.md](../../PROBLEM-SPACE.md), [RESEARCH.md](../../RESEARCH.md), or
-[COMPETITIVE-ANALYSIS.md](../../COMPETITIVE-ANALYSIS.md), because there is no
+[PROBLEM-SPACE.md](../../research/PROBLEM-SPACE.md), [RESEARCH.md](../../research/RESEARCH.md), or
+[COMPETITIVE-ANALYSIS.md](../../research/COMPETITIVE-ANALYSIS.md), because there is no
 citable prior art for "intent" as a formal, checkable program property.
 This is worth stating plainly rather than quietly dropping the term or
 inventing content for it under pressure to fill out the model.

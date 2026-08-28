@@ -27,7 +27,7 @@ leaks a token because nothing tracked the taint.
 ## The thesis *(adopted 2026-08-28, after Phase 0)*
 
 Phase 0 ranked five candidate theses
-([DESIGN-OPPORTUNITIES.md §8](DESIGN-OPPORTUNITIES.md#8-five-candidate-theses-ranked)).
+([DESIGN-OPPORTUNITIES.md §8](research/DESIGN-OPPORTUNITIES.md#8-five-candidate-theses-ranked)).
 Two are adopted, as a pair:
 
 > **T1 — the obligation row.** Every non-functional obligation a program is

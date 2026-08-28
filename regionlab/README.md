@@ -1,6 +1,6 @@
 # regionlab
 
-A small, standalone prototype validating [OWNERSHIP-MODEL.md](../OWNERSHIP-MODEL.md)'s
+A small, standalone prototype validating [OWNERSHIP-MODEL.md](../docs/language/OWNERSHIP-MODEL.md)'s
 region/linearity rules — not merged into `verifier/refspec/` (Phase 2's
 shipped v0.2 language and its 45 conformance tests are unmodified by
 this phase; "build small compiler prototypes where necessary" was the
@@ -31,4 +31,4 @@ region r {                        -- opens a region, binds `r: Region`
 ```
 
 Every rule this validates is listed, with its test file, in
-[SAFETY-GUARANTEES.md](../SAFETY-GUARANTEES.md).
+[SAFETY-GUARANTEES.md](../research/SAFETY-GUARANTEES.md).

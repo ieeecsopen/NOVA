@@ -1,8 +1,8 @@
 # Experiment 001 — Capability manifests
 
-Tests [P14](../../PROBLEM-SPACE.md#p14--a-dependency-inherits-all-of-your-authority)
+Tests [P14](../../research/PROBLEM-SPACE.md#p14--a-dependency-inherits-all-of-your-authority)
 and the cheapest part of thesis T2
-([DESIGN-OPPORTUNITIES.md §4](../../DESIGN-OPPORTUNITIES.md#4-theme-c--boundaries-and-the-adoption-problem)):
+([DESIGN-OPPORTUNITIES.md §4](../../research/DESIGN-OPPORTUNITIES.md#4-theme-c--boundaries-and-the-adoption-problem)):
 can a dependency's authority requirements be published as data and diffed,
 so that authority creep in a "patch" release is a *detectable, checkable*
 event rather than something discovered after an incident?

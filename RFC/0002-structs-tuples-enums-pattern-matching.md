@@ -5,7 +5,7 @@
 - **Depends on:** RFC 0001
 - **Resolves:** RFC 0001 §11 open question 3 ("what is the row of a
   stored capability?")
-- **Tier:** Optional language feature ([DESIGN-PRINCIPLES.md](../DESIGN-PRINCIPLES.md))
+- **Tier:** Optional language feature ([DESIGN-PRINCIPLES.md](../docs/foundation/DESIGN-PRINCIPLES.md))
 
 ## 1. Summary
 
@@ -111,7 +111,7 @@ TYPE-SYSTEM.md, "Nominal vs structural," for the full argument; in
 short, structural typing for named product types makes accidental
 substitution silent (TypeScript's structural typing is explicitly
 critiqued for this in
-[COMPETITIVE-ANALYSIS.md](../COMPETITIVE-ANALYSIS.md)), and NOVA's
+[COMPETITIVE-ANALYSIS.md](../research/COMPETITIVE-ANALYSIS.md)), and NOVA's
 priority order (Constitution Article III) puts explicit semantics above
 the convenience structural typing buys.
 

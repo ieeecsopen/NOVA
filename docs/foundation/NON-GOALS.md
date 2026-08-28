@@ -68,8 +68,8 @@ These have a plausible NOVA design and are deferred with a named gate.
 ### 2.1 Effect handlers
 
 Was deferred until after the memory model (Milestone 1); the memory
-model now exists ([MEMORY-MODEL.md](../../MEMORY-MODEL.md),
-[OWNERSHIP-MODEL.md](../../OWNERSHIP-MODEL.md)), which lifts the *precondition*
+model now exists ([MEMORY-MODEL.md](../language/MEMORY-MODEL.md),
+[OWNERSHIP-MODEL.md](../language/OWNERSHIP-MODEL.md)), which lifts the *precondition*
 for this gate — it does not lift the gate itself. Handlers are still not
 designed, still not implemented, and still need their own RFC, which
 must now address a concrete, newly-answerable question: how does a
@@ -77,7 +77,7 @@ captured continuation interact with a live linear exclusive-region
 capability on the stack being captured? Region-based ownership makes
 this question askable precisely (a continuation capturing a frame that
 holds `Excl(Region)` is exactly the case
-[OWNERSHIP-MODEL.md §7](../../OWNERSHIP-MODEL.md#7-open-questions) has not
+[OWNERSHIP-MODEL.md §7](../language/OWNERSHIP-MODEL.md#7-open-questions) has not
 yet considered) — it does not answer it. Remains a non-goal until that
 RFC exists.
 

@@ -46,7 +46,7 @@ level of "what counts as a value" rather than "what counts as a function."
 Curry; Plotkin's SOS). Unforgeable capability-as-value is the object-
 capability model (Dennis & Van Horn 1966; Miller's *Robust Composition*)
 — NOVA's delta is only that the *type system*, not just the runtime,
-enforces unforgeability; see [RESEARCH.md §R4](../../RESEARCH.md#r4--capability-security).
+enforces unforgeability; see [RESEARCH.md §R4](../../research/RESEARCH.md#r4--capability-security).
 
 **Status.** Implemented for ordinary values and capabilities. Not yet
 extended to compound data (structs, enums — Milestone 2), regions
@@ -130,7 +130,7 @@ honest than picking one and hiding the gap.
 
 **Prior art.** Entry-point-as-capability-source is Eio's `Stdenv.t`
 pattern (OCaml) and the object-capability tradition generally; see
-[RESEARCH.md §R4](../../RESEARCH.md#r4--capability-security).
+[RESEARCH.md §R4](../../research/RESEARCH.md#r4--capability-security).
 
 **Status.** Exact definition: implemented. Aspirational definition: see
 [PROGRAM-MODEL.md](PROGRAM-MODEL.md) for the critique and the revision.
@@ -145,7 +145,7 @@ runs continuously or repeatedly, responding to input over time.
 **Operational.** Not designed. There is no module system (Milestone 2)
 and therefore no NOVA notion of a long-lived boundary yet. The shape a
 service is expected to take, consistent with thesis T2
-([DESIGN-OPPORTUNITIES.md §4](../../DESIGN-OPPORTUNITIES.md#4-theme-c--boundaries-and-the-adoption-problem)):
+([DESIGN-OPPORTUNITIES.md §4](../../research/DESIGN-OPPORTUNITIES.md#4-theme-c--boundaries-and-the-adoption-problem)):
 a **component** (WASI Component Model sense) whose capability *imports*
 are its authority boundary, and whose entry points are ordinary
 effectful functions rather than a single `main`. The difference between
@@ -154,7 +154,7 @@ service's capability imports are supplied at *link time* by a host,
 repeatedly, rather than once by a bootstrapping runtime.
 
 **Prior art.** The Component Model's shared-nothing linking with WIT
-imports; see [RESEARCH.md §R16](../../RESEARCH.md#r16--webassembly-wasi-and-the-component-model).
+imports; see [RESEARCH.md §R16](../../research/RESEARCH.md#r16--webassembly-wasi-and-the-component-model).
 Erlang's process model as an alternative shape for "runs continuously" —
 not adopted, since NOVA's memory model is undecided (Theme B).
 
@@ -186,7 +186,7 @@ that:
    the naive version of this does not survive row polymorphism);
 3. has the model's output pass through an explicit boundary before
    reaching any privileged effect — an information-flow concern
-   (P20/R14), which [DESIGN-OPPORTUNITIES.md §5](../../DESIGN-OPPORTUNITIES.md#5-theme-e--what-does-not-unify)
+   (P20/R14), which [DESIGN-OPPORTUNITIES.md §5](../../research/DESIGN-OPPORTUNITIES.md#5-theme-e--what-does-not-unify)
    found does **not** reduce to the capability model and is explicitly
    *not* solved by anything NOVA has.
 
@@ -195,8 +195,8 @@ unsolved. If all three existed and composed, "agent" would be a fully
 adequate informal name for the pattern — and NOVA would have added no new
 semantics to get there, which is the point.
 
-**Prior art.** [RESEARCH.md §R13](../../RESEARCH.md#r13--ai-programming) and
-[§R14](../../RESEARCH.md#r14--information-flow-and-agent-security).
+**Prior art.** [RESEARCH.md §R13](../../research/RESEARCH.md#r13--ai-programming) and
+[§R14](../../research/RESEARCH.md#r14--information-flow-and-agent-security).
 
 **Status.** (1) implemented (it is just RFC 0001). (2) not implemented
 (Milestone 5, open question). (3) unsolved by any known mechanism NOVA
@@ -210,7 +210,7 @@ has; recorded as a real gap, not a future promise.
 memory, network round-trips, tokens, money.
 
 **Operational (proposed, not implemented).** A resource is *the thing a
-grade measures*. [DESIGN-OPPORTUNITIES.md §2](../../DESIGN-OPPORTUNITIES.md#2-theme-a--obligations-are-one-mechanism)
+grade measures*. [DESIGN-OPPORTUNITIES.md §2](../../research/DESIGN-OPPORTUNITIES.md#2-theme-a--obligations-are-one-mechanism)
 proposes generalizing RFC 0001's row from a set of labels to a map from
 labels to grades drawn from a semiring: `{Net: 3, Alloc: 4096}`. Under
 that proposal, a *capability* is the authority to touch a resource; the
@@ -238,7 +238,7 @@ a type-system change that has not been designed.
 
 **Prior art.** Graded modal types (Granule; Orchard, Liepelt & Eades
 2019); RAML (Hoffmann, Aehlig & Hofmann); Quantitative Type Theory
-(Atkey 2018) — see [RESEARCH.md §R5](../../RESEARCH.md#r5--resource-aware-programming).
+(Atkey 2018) — see [RESEARCH.md §R5](../../research/RESEARCH.md#r5--resource-aware-programming).
 
 **Status.** Defined. Not implemented. Milestone 5, gated on a type-system
 RFC per the experiment 003 correction already applied to
@@ -260,7 +260,7 @@ capability is unforgeable **because the grammar contains no expression
 form that produces one** — not because of a runtime check.
 
 **Prior art.** Fully established; see
-[RESEARCH.md §R4](../../RESEARCH.md#r4--capability-security), and RFC 0001 §3
+[RESEARCH.md §R4](../../research/RESEARCH.md#r4--capability-security), and RFC 0001 §3
 for the specific delta from Effekt and Austral.
 
 **Status.** Implemented and checked (25 conformance tests exercise this
@@ -287,10 +287,10 @@ entry 2 above.
 yet gradeable), not a guarantee about termination or timing, and not an
 information-flow property (entry 7's dual concern, in entry 5's sense —
 capability-safety and taint-safety are different axes;
-[DESIGN-OPPORTUNITIES.md §5](../../DESIGN-OPPORTUNITIES.md#5-theme-e--what-does-not-unify)).
+[DESIGN-OPPORTUNITIES.md §5](../../research/DESIGN-OPPORTUNITIES.md#5-theme-e--what-does-not-unify)).
 
 **Prior art.** Algebraic effects and row-typed effect systems generally;
-see [RESEARCH.md §R3](../../RESEARCH.md#r3--effect-systems). RFC 0001 §3
+see [RESEARCH.md §R3](../../research/RESEARCH.md#r3--effect-systems). RFC 0001 §3
 already gives the full comparison and the withdrawn/narrowed novelty
 claim.
 
@@ -320,7 +320,7 @@ Every row in that table is a **constraint**. The first two rows are
 implemented today and share one mechanism, per Theme A. The third is
 Theme A's proposed extension of that same mechanism (entry 6). The
 fourth is Theme E's negative finding
-([DESIGN-OPPORTUNITIES.md §5](../../DESIGN-OPPORTUNITIES.md#5-theme-e--what-does-not-unify)):
+([DESIGN-OPPORTUNITIES.md §5](../../research/DESIGN-OPPORTUNITIES.md#5-theme-e--what-does-not-unify)):
 refinements constrain *values*, rows constrain *actions*, and they do not
 reduce to one mechanism. A general-purpose refinement system needs its
 own machinery (Milestone 6), separate from the row.
@@ -370,7 +370,7 @@ refuses to claim it.
 
 **Prior art.** The assumption/specification/proof distinction is standard
 in formal methods (e.g. the "verification gap" discussed for Dafny/SPARK
-in [RESEARCH.md §R12](../../RESEARCH.md#r12--formal-verification)); the
+in [RESEARCH.md §R12](../../research/RESEARCH.md#r12--formal-verification)); the
 four-level framing here is NOVA's organization of it, not a new idea.
 
 **Status.** The ladder itself is a documentation discipline, adopted now.
@@ -384,7 +384,7 @@ estimate, a model's output — as opposed to a value computed exactly.
 
 **NOVA's position: this is a property of a value, not a property of a
 program.** The original program model lists `Uncertainty` as a top-level
-ingredient alongside `State` and `Effects`. [RESEARCH.md §R10](../../RESEARCH.md#r10--uncertainty)
+ingredient alongside `State` and `Effects`. [RESEARCH.md §R10](../../research/RESEARCH.md#r10--uncertainty)
 found the mature version of this idea already exists —
 `Uncertain[T]` (Bornholt, Mytkowicz & McKinley, ASPLOS 2014) represents a
 value as a distribution and makes comparison return evidence rather than
@@ -417,8 +417,8 @@ optimization — as distinct from *what* it computes.
 
 **NOVA's position: this is the least-defined term in the original model,
 and Constitution Article VIII already flags it as a category rather than
-a design.** [RESEARCH.md §R20](../../RESEARCH.md#r20--adaptive-and-self-optimising-software)
-and [PROBLEM-SPACE.md P22](../../PROBLEM-SPACE.md#p22--performance-tuning-is-entangled-with-algorithm)
+a design.** [RESEARCH.md §R20](../../research/RESEARCH.md#r20--adaptive-and-self-optimising-software)
+and [PROBLEM-SPACE.md P22](../../research/PROBLEM-SPACE.md#p22--performance-tuning-is-entangled-with-algorithm)
 found the one general, working precedent — Halide's separation of
 algorithm from schedule — confined, after thirteen years, to array
 pipelines, with no general-purpose analogue.
@@ -434,5 +434,5 @@ performance. It follows directly from Constitution Article III ranking
 performance below soundness.
 
 **Status.** No operational semantics. Explicitly speculative
-([RESEARCH.md](../../RESEARCH.md#summary-where-the-literature-is-thin) tags
+([RESEARCH.md](../../research/RESEARCH.md#summary-where-the-literature-is-thin) tags
 this Speculative outside the array/tensor domain). No syntax proposed.

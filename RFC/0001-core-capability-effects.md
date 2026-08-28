@@ -501,8 +501,8 @@ rows, the derivation rule, equality checking, closures, row polymorphism,
    diagnostics for an inference failure will be poor.
 5. Is `widen` a hole big enough to make the equality rule pointless?
 6. ~~**Does the derivation rule survive the memory model?**~~ **Resolved
-   by [MEMORY-MODEL.md §7](../MEMORY-MODEL.md#7-the-design-and-how-it-resolves-theme-b)
-   and [OWNERSHIP-MODEL.md](../OWNERSHIP-MODEL.md).** Capabilities did
+   by [MEMORY-MODEL.md §7](../docs/language/MEMORY-MODEL.md#7-the-design-and-how-it-resolves-theme-b)
+   and [OWNERSHIP-MODEL.md](../docs/language/OWNERSHIP-MODEL.md).** Capabilities did
    not need to become second-class after all — Theme B's forced choice
    had a third option: keep every capability first-class (no revision to
    this RFC) and apply *linearity*, not second-classness, to exactly one
@@ -511,7 +511,7 @@ rows, the derivation rule, equality checking, closures, row polymorphism,
    Milestone 1; the memory model is layered on top of it, not through a
    redesign of it. This RFC is no longer provisional.
 7. Should the row be **graded** rather than a plain set?
-   [DESIGN-OPPORTUNITIES.md](../DESIGN-OPPORTUNITIES.md) Theme A argues
+   [DESIGN-OPPORTUNITIES.md](../research/DESIGN-OPPORTUNITIES.md) Theme A argues
    that budgets, deadlines, retry policy, instrumentation and package
    manifests are all the same row with something attached to each label.
    v0.1 deliberately ships the ungraded case; the question is whether the

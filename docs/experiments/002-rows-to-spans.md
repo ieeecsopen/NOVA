@@ -1,6 +1,6 @@
 # Experiment 002 — Instrumentation derived from rows
 
-Tests [P21](../../PROBLEM-SPACE.md#p21--observability-is-bolted-on-and-drifts):
+Tests [P21](../../research/PROBLEM-SPACE.md#p21--observability-is-bolted-on-and-drifts):
 can trace spans be *generated* from a function's capability uses, so that
 instrumentation cannot drift out of sync with the code the way hand-placed
 logging does?
