@@ -1,0 +1,47 @@
+// examples/failure-lifecycle.nova
+// Demonstrates the complete lifecycle of a failure:
+// Detection -> Typed Representation -> Contextual Propagation -> Recovery -> Fallback
+
+import std.result;
+
+fn try_operation(attempt: Int) -> Result[String, String] {
+    if attempt < 3 {
+        Result::Err("TransientNetworkTimeout: 504 Gateway Timeout")
+    } else {
+        Result::Ok("success: payload retrieved")
+    }
+}
+
+fn retry_operation(rt: Runtime, attempt: Int, max_retries: Int) -> Result[String, String] ! {Runtime} {
+    if attempt > max_retries {
+        Result::Err("fatal: exhausted all retry attempts")
+    } else {
+        rt.print("executing attempt...");
+        match try_operation(attempt) {
+            Result::Ok(data) => {
+                rt.print("operation succeeded!");
+                Result::Ok(data)
+            },
+            Result::Err(err) => {
+                rt.print("caught transient error; retrying...");
+                retry_operation(rt, attempt + 1, max_retries)
+            },
+        }
+    }
+}
+
+fn main(rt: Runtime) -> Int ! {Runtime} {
+    rt.print("=== Failure Lifecycle Demonstration ===");
+    
+    // Execute resilient workflow with recovery
+    match retry_operation(rt, 1, 4) {
+        Result::Ok(msg) => {
+            rt.print(msg);
+            0
+        },
+        Result::Err(err_msg) => {
+            rt.print(err_msg);
+            1
+        },
+    }
+}
