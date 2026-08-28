@@ -1,0 +1,19 @@
+#!/bin/sh
+# NOVA Compiler & Toolchain Executable Wrapper
+# Automatically selects Python 3.11+
+
+PYTHON="${PYTHON:-python3}"
+if ! "$PYTHON" -c 'import sys; sys.exit(0 if sys.version_info >= (3, 10) else 1)' 2>/dev/null; then
+    if command -v python3.11 >/dev/null 2>&1; then
+        PYTHON=python3.11
+    elif command -v python3.12 >/dev/null 2>&1; then
+        PYTHON=python3.12
+    elif command -v python3.10 >/dev/null 2>&1; then
+        PYTHON=python3.10
+    fi
+fi
+
+DIR="$(dirname "$0")"
+export PYTHONPATH="$DIR:$PYTHONPATH"
+
+exec "$PYTHON" -m compiler.nova_compiler.cli "$@"

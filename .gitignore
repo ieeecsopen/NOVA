@@ -3,3 +3,4 @@ __pycache__/
 target/
 *.wasm
 .DS_Store
+.nova_cache/
