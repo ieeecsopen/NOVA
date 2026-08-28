@@ -10,6 +10,9 @@ Commands:
   nova doc [path]              Generate structured API documentation
   nova add <pkg> [--caps ...]  Add a dependency to nova.toml with capability bounds
   nova remove <pkg>            Remove a dependency from nova.toml
+  nova update                  Update and lock dependencies into nova.lock
+  nova publish                 Package and compute integrity hashes for registry release
+  nova deploy [--target ...]   Synthesize deployment bundles (container, edge, monolith)
   nova lsp                     Launch the Language Server Protocol (LSP) server
   nova bench <file>            Benchmark compile time, memory, binary size, and latency
 """
@@ -26,7 +29,13 @@ from .fmt import format_file
 from .lint import lint_file
 from .test_runner import run_tests
 from .docgen import generate_docs
-from .pkg import add_dependency, remove_dependency
+from .pkg import (
+    add_dependency,
+    remove_dependency,
+    update_dependencies,
+    publish_package,
+    deploy_application,
+)
 from .lsp_server import NovaLSPServer
 
 
@@ -82,6 +91,18 @@ def main(argv: list[str] = None) -> int:
     # nova remove
     remove_p = subparsers.add_parser("remove", help="Remove a dependency from nova.toml")
     remove_p.add_argument("pkg", help="Package name")
+
+    # nova update
+    subparsers.add_parser("update", help="Update and lock dependencies into nova.lock")
+
+    # nova publish
+    publish_p = subparsers.add_parser("publish", help="Package archive and calculate integrity hashes")
+    publish_p.add_argument("-o", "--output", default="dist/", help="Output directory for archive")
+
+    # nova deploy
+    deploy_p = subparsers.add_parser("deploy", help="Synthesize deployment artifacts from application model")
+    deploy_p.add_argument("--target", default="container", choices=["container", "edge", "monolith"], help="Deployment target")
+    deploy_p.add_argument("-o", "--output", default="dist/deploy", help="Output directory for deployment files")
 
     # nova lsp
     subparsers.add_parser("lsp", help="Run Language Server Protocol server over stdio")
@@ -178,6 +199,18 @@ def main(argv: list[str] = None) -> int:
 
     elif args.command == "remove":
         remove_dependency(args.pkg)
+        return 0
+
+    elif args.command == "update":
+        update_dependencies()
+        return 0
+
+    elif args.command == "publish":
+        publish_package(output_dir=args.output)
+        return 0
+
+    elif args.command == "deploy":
+        deploy_application(target=args.target, output_dir=args.output)
         return 0
 
     elif args.command == "lsp":
