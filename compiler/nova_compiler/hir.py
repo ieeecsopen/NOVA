@@ -208,7 +208,7 @@ def lower_expr_to_hir(e: a.Expr) -> HIRExpr:
     if isinstance(e, a.FieldAccess):
         return HIRFieldAccess(receiver=lower_expr_to_hir(e.recv), field_name=e.field)
     if isinstance(e, a.StructLit):
-        return HIRStructInit(struct_name=e.struct_name, fields=[(f_name, lower_expr_to_hir(f_val)) for f_name, f_val in e.fields])
+        return HIRStructInit(struct_name=e.name, fields=[(f_name, lower_expr_to_hir(f_val)) for f_name, f_val in e.fields])
     if isinstance(e, a.EnumCtor):
         payload = lower_expr_to_hir(e.args[0]) if e.args else None
         return HIREnumInit(enum_name=e.enum_name, variant=e.variant, payload=payload)
