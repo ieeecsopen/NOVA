@@ -1,0 +1,31 @@
+{
+  "systems": {
+    "http_10k_ops_ms": 0.35,
+    "ops_per_sec": 28690956
+  },
+  "data": {
+    "data_stream_50k_ms": 1.16,
+    "ops_per_sec": 43023113
+  },
+  "concurrency": {
+    "task_spawn_50k_ms": 198.47,
+    "tasks_per_sec": 251923
+  },
+  "distributed": {
+    "saga_5k_ops_ms": 0.06,
+    "sagas_per_sec": 77719521
+  },
+  "fullstack": {
+    "fullstack_10k_cycles_ms": 0.57,
+    "cycles_per_sec": 17424127
+  },
+  "ai_governance": {
+    "budget_eval_50k_ms": 0.51,
+    "evals_per_sec": 97473638
+  },
+  "compiler": {
+    "clean_compile_ms": 411.12,
+    "incremental_compile_ms": 127.0,
+    "binary_size_bytes": 33544
+  }
+}
