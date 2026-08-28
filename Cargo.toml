@@ -1,0 +1,17 @@
+[workspace]
+members = [
+    "compiler",
+    "runtime",
+]
+resolver = "2"
+
+[package]
+name = "nova-lang"
+version = "0.1.0"
+edition = "2021"
+authors = ["Hesara Perera <hesarap3@gmail.com>"]
+description = "The NOVA Programming Language — Capability-typed effects, Region XOR memory model, and unified full-stack architecture."
+license = "Apache-2.0"
+repository = "https://github.com/ieeecsopen/NOVA"
+
+[dependencies]
