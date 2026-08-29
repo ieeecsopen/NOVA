@@ -4,10 +4,10 @@
 
 [![CI](https://github.com/ieeecsopen/NOVA/actions/workflows/ci.yml/badge.svg)](https://github.com/ieeecsopen/NOVA/actions/workflows/ci.yml)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/NOVA-1.0--Beta-7c3aed.svg)](docs/language/NOVA-1.0-SPECIFICATION.md)
+[![Release](https://img.shields.io/badge/Release-1.0_%22Genesis%22-7c3aed.svg)](https://github.com/ieeecsopen/NOVA/releases/tag/v1.0.0)
 [![Conformance](https://img.shields.io/badge/Conformance-45%2F45_Passed-0e8a16.svg)](tests/)
 [![RegionLab](https://img.shields.io/badge/RegionLab-14%2F14_Passed-0e8a16.svg)](regionlab/)
-[![Links](https://img.shields.io/badge/Links-721%2F721_Verified-brightgreen.svg)](tools/check-links.py)
+[![Links](https://img.shields.io/badge/Links-738%2F738_Verified-brightgreen.svg)](tools/check-links.py)
 
 **A Constraint-Native Programming Language & Unified Application Platform**
 
