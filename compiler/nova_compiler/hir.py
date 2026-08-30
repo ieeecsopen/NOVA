@@ -81,7 +81,7 @@ class HIRStructInit(HIRExpr):
 class HIREnumInit(HIRExpr):
     enum_name: str = ""
     variant: str = ""
-    payload: Optional[HIRExpr] = None
+    payloads: list[HIRExpr] = field(default_factory=list)
 
 
 @dataclass
@@ -164,7 +164,9 @@ class HIRStruct:
 @dataclass
 class HIREnum:
     name: str
-    variants: list[tuple[str, Optional[HIRType]]]
+    # (variant name, list of positional payload types). An empty list is a
+    # payload-free variant (`None`, `Nil`).
+    variants: list[tuple[str, list[HIRType]]]
 
 
 @dataclass
@@ -210,8 +212,39 @@ def lower_expr_to_hir(e: a.Expr) -> HIRExpr:
     if isinstance(e, a.StructLit):
         return HIRStructInit(struct_name=e.name, fields=[(f_name, lower_expr_to_hir(f_val)) for f_name, f_val in e.fields])
     if isinstance(e, a.EnumCtor):
-        payload = lower_expr_to_hir(e.args[0]) if e.args else None
-        return HIREnumInit(enum_name=e.enum_name, variant=e.variant, payload=payload)
+        return HIREnumInit(enum_name=e.enum_name, variant=e.variant,
+                           payloads=[lower_expr_to_hir(arg) for arg in e.args])
+    if isinstance(e, a.TupleLit):
+        # Represent a tuple literal as an anonymous struct init so downstream
+        # passes have a single product-type shape to handle.
+        return HIRStructInit(struct_name="Tuple",
+                             fields=[(str(i), lower_expr_to_hir(x))
+                                     for i, x in enumerate(e.elems)])
+    if isinstance(e, a.Match):
+        arms = []
+        for arm in e.arms:
+            pat = arm.pattern
+            if isinstance(pat, a.PVariant):
+                variant = pat.variant
+                binders = [p.name if isinstance(p, a.PBind) else "_"
+                           for p in pat.args]
+            elif isinstance(pat, a.PBind):
+                variant, binders = None, [pat.name]
+            else:  # PWildcard / literal patterns
+                variant, binders = None, []
+            arms.append(HIRMatchArm(pattern_variant=variant,
+                                    pattern_var=binders[0] if binders else None,
+                                    body=lower_expr_to_hir(arm.body)))
+        return HIRMatch(scrutinee=lower_expr_to_hir(e.scrutinee), arms=arms)
+    if isinstance(e, a.Lambda):
+        # A lambda lowers to a named closure reference; capture analysis is
+        # left to a later pass. Kept as an opaque var so `--emit-hir` output
+        # stays readable rather than crashing.
+        return HIRVar(name=f"<closure/{len(e.params)}>")
+    if isinstance(e, a.For):
+        return HIRVar(name="<for-loop>")
+    if isinstance(e, a.While):
+        return HIRVar(name="<while-loop>")
     if isinstance(e, a.If):
         then_b = lower_expr_to_hir(e.then)
         else_b = lower_expr_to_hir(e.els) if e.els else None
@@ -243,8 +276,8 @@ def lower_ast_to_hir(decls: list[a.Decl], module_name: str = "main") -> HIRModul
         elif isinstance(d, a.EnumDecl):
             variants = []
             for v in d.variants:
-                v_ty = lower_type_expr(v.payloads[0]) if v.payloads else None
-                variants.append((v.name, v_ty))
+                payload_tys = [lower_type_expr(t) for t in v.args]
+                variants.append((v.name, payload_tys))
             mod.enums.append(HIREnum(name=d.name, variants=variants))
         elif isinstance(d, a.FnDecl):
             params = [HIRParam(name=p.name, ty=lower_type_expr(p.ty)) for p in d.params]
