@@ -1,20 +1,41 @@
-"""Native C / LLVM Code Generation Backend for NOVA.
+"""Native C code generation backend for NOVA (supported subset).
 
-Lowers validated AST / HIR into optimized C99 / LLVM-compatible code
-and invokes the system clang compiler to emit native machine executables.
+Lowers a type-checked program to C99 and invokes `clang` to produce a
+native executable.
+
+Scope (v0.2): this backend deliberately supports only the first-order,
+monomorphic core:
+
+  * top-level `fn` declarations
+  * `Int`, `Bool`, `String`, `Unit`
+  * `struct` types with fields of supported type
+  * the `Runtime` and `Clock` prelude capabilities
+  * arithmetic, comparison, boolean, `if`/`else`, `let`, `while`,
+    `let mut` + assignment, function calls, `rt.print` / `rt.clock` /
+    `clock.now`
+
+Anything outside that (enums, `match`, closures, generics, traits,
+`List`, `for`, tuples, imports beyond the prelude) raises
+`CodegenUnsupported`. The driver catches it and falls back to the
+reference interpreter — the program still runs, just not as a standalone
+machine binary. This keeps the backend honest: it never emits C it
+cannot compile.
 """
 from __future__ import annotations
 
 import os
 import subprocess
 import tempfile
-from typing import Any, Optional
 
 from verifier.refspec import ast as a
 from verifier.refspec.check import CheckResult
 
 
-RUNTIME_HEADER = """
+class CodegenUnsupported(Exception):
+    """Raised when the program uses a construct the C backend cannot lower."""
+
+
+RUNTIME_HEADER = r"""
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -22,21 +43,16 @@ RUNTIME_HEADER = """
 #include <string.h>
 #include <time.h>
 
-// NOVA Primitive Types
-typedef int64_t nova_int;
-typedef bool nova_bool;
+typedef int64_t     nova_int;
+typedef bool        nova_bool;
 typedef const char* nova_string;
 
-// Capability System Structs
 typedef struct { void* handle; } nova_runtime_t;
 typedef struct { void* handle; } nova_clock_t;
-typedef struct { void* handle; } nova_fs_t;
-typedef struct { void* handle; } nova_net_t;
 
-// Builtin Runtime Functions
 static inline void nova_print(nova_runtime_t rt, nova_string msg) {
     (void)rt;
-    printf("%s\\n", msg ? msg : "");
+    printf("%s\n", msg ? msg : "");
 }
 
 static inline nova_clock_t nova_runtime_clock(nova_runtime_t rt) {
@@ -52,268 +68,271 @@ static inline nova_int nova_clock_now(nova_clock_t c) {
     return (nova_int)(ts.tv_sec * 1000LL + ts.tv_nsec / 1000000LL);
 }
 
-static inline nova_string nova_int_to_str(nova_int val) {
-    char* buf = (char*)malloc(32);
-    snprintf(buf, 32, "%lld", (long long)val);
-    return buf;
-}
-
 static inline nova_string nova_str_concat(nova_string s1, nova_string s2) {
     if (!s1) s1 = "";
     if (!s2) s2 = "";
-    size_t len1 = strlen(s1);
-    size_t len2 = strlen(s2);
-    char* res = (char*)malloc(len1 + len2 + 1);
-    memcpy(res, s1, len1);
-    memcpy(res + len1, s2, len2);
-    res[len1 + len2] = '\\0';
-    return res;
+    size_t l1 = strlen(s1), l2 = strlen(s2);
+    char* r = (char*)malloc(l1 + l2 + 1);
+    memcpy(r, s1, l1);
+    memcpy(r + l1, s2, l2);
+    r[l1 + l2] = '\0';
+    return r;
 }
 """
+
+_SUPPORTED_TYPES = {"Int", "Bool", "String", "Unit"}
+_SUPPORTED_CAPS = {"Runtime", "Clock"}
 
 
 class CCodeGen:
     def __init__(self, check_result: CheckResult) -> None:
-        self.check_result = check_result
-        self.output_lines: list[str] = []
-        self.indent_level = 0
+        self.r = check_result
+        self.lines: list[str] = []
+        self.level = 0
+        self._tmp = 0
 
+    # -------------------------------------------------------- feasibility
+    def ensure_supported(self) -> None:
+        if self.r.enums:
+            raise CodegenUnsupported("enum types")
+        if self.r.traits or self.r.impls:
+            raise CodegenUnsupported("traits / impls")
+        for fn in self.r.fns.values():
+            if fn.type_params or fn.row_params:
+                raise CodegenUnsupported(f"generic function `{fn.name}`")
+            self._check_expr_supported(fn.decl.body)
+
+    def _check_expr_supported(self, e) -> None:
+        if e is None:
+            return
+        if isinstance(e, (a.Lambda,)):
+            raise CodegenUnsupported("closures")
+        if isinstance(e, a.Match):
+            raise CodegenUnsupported("`match` expressions")
+        if isinstance(e, a.For):
+            raise CodegenUnsupported("`for` loops")
+        if isinstance(e, a.EnumCtor):
+            raise CodegenUnsupported("enum constructors")
+        if isinstance(e, a.TupleLit):
+            raise CodegenUnsupported("tuple values")
+        for child in _children(e):
+            self._check_expr_supported(child)
+
+    # --------------------------------------------------------- emit utils
     def emit(self, line: str = "") -> None:
-        if line:
-            self.output_lines.append("    " * self.indent_level + line)
-        else:
-            self.output_lines.append("")
+        self.lines.append(("    " * self.level + line) if line else "")
 
-    def indent(self) -> None:
-        self.indent_level += 1
+    def fresh(self, hint: str = "t") -> str:
+        self._tmp += 1
+        return f"__nova_{hint}{self._tmp}"
 
-    def dedent(self) -> None:
-        self.indent_level = max(0, self.indent_level - 1)
-
+    # ------------------------------------------------------------ codegen
     def generate(self) -> str:
-        self.emit("// Generated by NOVA Native Compiler")
+        self.ensure_supported()
+        self.emit("// Generated by the NOVA native C backend (supported subset)")
         self.emit(RUNTIME_HEADER)
-        self.emit()
 
-        # Forward declarations of structs
-        self.emit("// Forward declarations")
-        for struct_info in self.check_result.structs.values():
-            self.emit(f"typedef struct nova_struct_{struct_info.name} nova_struct_{struct_info.name};")
+        for s in self.r.structs.values():
+            self.emit(f"typedef struct nova_struct_{s.name} nova_struct_{s.name};")
         self.emit()
-
-        # Struct definitions
-        for struct_info in self.check_result.structs.values():
-            self.emit(f"struct nova_struct_{struct_info.name} {{")
-            self.indent()
-            for fld_name, fld_ty in struct_info.fields.items():
-                c_ty = self.map_type_name(str(fld_ty))
-                self.emit(f"{c_ty} {fld_name};")
-            self.dedent()
+        for s in self.r.structs.values():
+            self.emit(f"struct nova_struct_{s.name} {{")
+            self.level += 1
+            for fname, fty in s.fields.items():
+                self.emit(f"{self._c_type(str(fty))} {fname};")
+            self.level -= 1
             self.emit("};")
             self.emit()
 
-        # Function forward declarations
-        for fn_info in self.check_result.fns.values():
-            decl = fn_info.decl
-            ret_ty = self.map_type_name(decl.ret.name if decl.ret and hasattr(decl.ret, 'name') else 'Int')
-            param_sig = self.gen_params(decl.params)
-            self.emit(f"{ret_ty} nova_fn_{decl.name}({param_sig});")
+        # Forward declarations first — fixes calls to functions defined later.
+        for fn in self.r.fns.values():
+            self.emit(self._signature(fn.decl) + ";")
         self.emit()
 
-        # Function definitions
-        for fn_info in self.check_result.fns.values():
-            self.gen_function(fn_info.decl)
+        for fn in self.r.fns.values():
+            self._gen_function(fn.decl)
 
-        # C Main entrypoint
-        self.emit()
         self.emit("int main(int argc, char** argv) {")
-        self.indent()
+        self.level += 1
         self.emit("(void)argc; (void)argv;")
         self.emit("nova_runtime_t rt = { .handle = NULL };")
-        if "main" in self.check_result.fns:
-            self.emit("nova_int code = nova_fn_main(rt);")
-            self.emit("return (int)code;")
+        if "main" in self.r.fns:
+            self.emit("nova_int __code = nova_fn_main(rt);")
+            self.emit("return (int)__code;")
         else:
             self.emit("return 0;")
-        self.dedent()
+        self.level -= 1
         self.emit("}")
+        return "\n".join(self.lines)
 
-        return "\n".join(self.output_lines)
+    def _c_type(self, name: str) -> str:
+        base = name.split("[")[0]
+        return {
+            "Int": "nova_int", "Bool": "nova_bool",
+            "String": "nova_string", "Unit": "nova_int",
+            "Runtime": "nova_runtime_t", "Clock": "nova_clock_t",
+        }.get(base, f"nova_struct_{base}"
+              if base in self.r.structs else "nova_int")
 
-    def map_type_name(self, name: str) -> str:
-        if name in ("Int", "int"):
-            return "nova_int"
-        elif name in ("Bool", "bool"):
-            return "nova_bool"
-        elif name in ("String", "str"):
-            return "nova_string"
-        elif name == "Runtime":
-            return "nova_runtime_t"
-        elif name == "Clock":
-            return "nova_clock_t"
-        elif name in self.check_result.structs:
-            return f"nova_struct_{name}"
-        return "nova_int"
-
-    def gen_params(self, params: list[a.Param]) -> str:
-        if not params:
-            return "void"
-        parts = []
-        for p in params:
-            c_ty = self.map_type_name(p.ty.name if hasattr(p.ty, 'name') else 'Int')
-            parts.append(f"{c_ty} {p.name}")
-        return ", ".join(parts)
-
-    def gen_function(self, decl: a.FnDecl) -> None:
-        ret_ty = self.map_type_name(decl.ret.name if decl.ret and hasattr(decl.ret, 'name') else 'Int')
-        param_sig = self.gen_params(decl.params)
-        self.emit(f"{ret_ty} nova_fn_{decl.name}({param_sig}) {{")
-        self.indent()
-
-        if decl.body:
-            if isinstance(decl.body, a.Block):
-                body_code = self.gen_block_body(decl.body)
-                self.emit(body_code)
-            else:
-                expr_c = self.gen_expr(decl.body)
-                self.emit(f"return {expr_c};")
+    def _signature(self, decl: a.FnDecl) -> str:
+        ret = self._c_type(_type_name(decl.ret))
+        if not decl.params:
+            params = "void"
         else:
-            self.emit("return 0;")
+            params = ", ".join(
+                f"{self._c_type(_type_name(p.ty))} {p.name}"
+                for p in decl.params)
+        return f"{ret} nova_fn_{decl.name}({params})"
 
-        self.dedent()
+    def _gen_function(self, decl: a.FnDecl) -> None:
+        self.emit(self._signature(decl) + " {")
+        self.level += 1
+        ret_c = self._c_type(_type_name(decl.ret))
+        result = self._gen_block_value(decl.body)
+        self.emit(f"return ({ret_c})({result});")
+        self.level -= 1
         self.emit("}")
         self.emit()
 
-    def gen_block_body(self, block: a.Block) -> str:
-        lines = []
-        for stmt in block.stmts:
-            if isinstance(stmt, a.Let):
-                init_val = self.gen_expr(stmt.value) if stmt.value else "0"
-                lines.append(f"__auto_type {stmt.name} = {init_val};")
-            elif isinstance(stmt, a.Assign):
-                val = self.gen_expr(stmt.value)
-                lines.append(f"{stmt.name} = {val};")
-            elif isinstance(stmt, a.While):
-                cond = self.gen_expr(stmt.cond)
-                body = self.gen_block_body(stmt.body) if isinstance(stmt.body, a.Block) else self.gen_expr(stmt.body)
-                lines.append(f"while ({cond}) {{\n{body}\n}}")
-            elif isinstance(stmt, a.Expr):
-                expr_c = self.gen_expr(stmt)
-                lines.append(f"{expr_c};")
-
-        if block.tail:
-            if isinstance(block.tail, a.If):
-                cond = self.gen_expr(block.tail.cond)
-                then_body = self.gen_block_body(block.tail.then) if isinstance(block.tail.then, a.Block) else f"return {self.gen_expr(block.tail.then)};"
-                else_body = self.gen_block_body(block.tail.els) if isinstance(block.tail.els, a.Block) else (f"return {self.gen_expr(block.tail.els)};" if block.tail.els else "return 0;")
-                lines.append(f"if ({cond}) {{\n{then_body}\n    }} else {{\n{else_body}\n    }}")
+    def _gen_block_value(self, block) -> str:
+        """Emit a block's statements and return a C expression for its value."""
+        if not isinstance(block, a.Block):
+            return self._gen_expr(block)
+        for st in block.stmts:
+            if isinstance(st, a.Let):
+                init = self._gen_expr(st.value)
+                self.emit(f"__auto_type {st.name} = ({init});")
+            elif isinstance(st, a.Assign):
+                self.emit(f"{st.name} = ({self._gen_expr(st.value)});")
+            elif isinstance(st, a.While):
+                self.emit(f"while ({self._gen_expr(st.cond)}) {{")
+                self.level += 1
+                self._gen_block_value(st.body)
+                self.level -= 1
+                self.emit("}")
             else:
-                res_c = self.gen_expr(block.tail)
-                lines.append(f"return {res_c};")
-        else:
-            lines.append("return 0;")
-
-        return "\n".join(f"    {l}" for l in lines)
-
-    def gen_expr(self, expr: a.Expr) -> str:
-        if isinstance(expr, a.IntLit):
-            return str(expr.value)
-        elif isinstance(expr, a.StrLit):
-            escaped = expr.value.replace('"', '\\"')
-            return f'"{escaped}"'
-        elif isinstance(expr, a.BoolLit):
-            return "true" if expr.value else "false"
-        elif isinstance(expr, a.Var):
-            return expr.name
-        elif isinstance(expr, a.Binary):
-            l = self.gen_expr(expr.left)
-            r = self.gen_expr(expr.right)
-            if expr.op == "+":
-                return f"({l} + {r})"
-            elif expr.op == "-":
-                return f"({l} - {r})"
-            elif expr.op == "*":
-                return f"({l} * {r})"
-            elif expr.op == "/":
-                return f"({l} / {r})"
-            elif expr.op == "==":
-                return f"({l} == {r})"
-            elif expr.op == "!=":
-                return f"({l} != {r})"
-            elif expr.op == "<":
-                return f"({l} < {r})"
-            elif expr.op == "<=":
-                return f"({l} <= {r})"
-            elif expr.op == ">":
-                return f"({l} > {r})"
-            elif expr.op == ">=":
-                return f"({l} >= {r})"
-            return f"({l} {expr.op} {r})"
-        elif isinstance(expr, a.Call):
-            if isinstance(expr.callee, a.Var):
-                callee_name = expr.callee.name
-                args_c = ", ".join(self.gen_expr(arg) for arg in expr.args)
-                return f"nova_fn_{callee_name}({args_c})"
-            callee_c = self.gen_expr(expr.callee)
-            args_c = ", ".join(self.gen_expr(arg) for arg in expr.args)
-            return f"{callee_c}({args_c})"
-        elif isinstance(expr, a.MethodCall):
-            recv_c = self.gen_expr(expr.recv)
-            if expr.op == "print":
-                arg_c = self.gen_expr(expr.args[0]) if expr.args else '""'
-                return f"nova_print({recv_c}, {arg_c})"
-            elif expr.op == "clock":
-                return f"nova_runtime_clock({recv_c})"
-            elif expr.op == "now":
-                return f"nova_clock_now({recv_c})"
-            args_c = ", ".join(self.gen_expr(arg) for arg in expr.args)
-            return f"nova_method_{expr.op}({recv_c}{', ' + args_c if args_c else ''})"
-        elif isinstance(expr, a.FieldAccess):
-            recv_c = self.gen_expr(expr.recv)
-            return f"({recv_c}.{expr.field})"
-        elif isinstance(expr, a.StructLit):
-            fld_inits = []
-            for fld_name, fld_expr in expr.fields:
-                fld_val = self.gen_expr(fld_expr)
-                fld_inits.append(f".{fld_name} = {fld_val}")
-            return f"(nova_struct_{expr.name}){{ {', '.join(fld_inits)} }}"
-        elif isinstance(expr, a.If):
-            cond = self.gen_expr(expr.cond)
-            then_c = self.gen_expr(expr.then)
-            else_c = self.gen_expr(expr.els) if expr.els else "0"
-            return f"({cond} ? {then_c} : {else_c})"
-        elif isinstance(expr, a.Block):
-            if not expr.stmts and expr.tail:
-                return self.gen_expr(expr.tail)
+                self.emit(f"(void)({self._gen_expr(st)});")
+        if block.tail is None:
             return "0"
-        return "0"
+        return self._gen_expr(block.tail)
+
+    def _gen_expr(self, e) -> str:
+        if isinstance(e, a.IntLit):
+            return str(e.value)
+        if isinstance(e, a.BoolLit):
+            return "true" if e.value else "false"
+        if isinstance(e, a.StrLit):
+            escaped = e.value.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n")
+            return f'"{escaped}"'
+        if isinstance(e, a.UnitLit):
+            return "0"
+        if isinstance(e, a.Var):
+            return e.name
+        if isinstance(e, a.Unary):
+            inner = self._gen_expr(e.operand)
+            return f"(-({inner}))" if e.op == "-" else f"(!({inner}))"
+        if isinstance(e, a.Binary):
+            l, r = self._gen_expr(e.left), self._gen_expr(e.right)
+            return f"(({l}) {e.op} ({r}))"
+        if isinstance(e, a.If):
+            c = self._gen_expr(e.cond)
+            t = self._gen_expr(e.then)
+            f = self._gen_expr(e.els) if e.els is not None else "0"
+            return f"(({c}) ? ({t}) : ({f}))"
+        if isinstance(e, a.Block):
+            # Statement-expression: GCC/Clang extension, fine under clang.
+            saved, self.lines = self.lines, []
+            saved_level, self.level = self.level, 1
+            value = self._gen_block_value(e)
+            body = "\n".join(self.lines + [f"    {value};"])
+            self.lines, self.level = saved, saved_level
+            return "({\n" + body + "\n})"
+        if isinstance(e, a.Call):
+            if isinstance(e.callee, a.Var):
+                args = ", ".join(self._gen_expr(x) for x in e.args)
+                return f"nova_fn_{e.callee.name}({args})"
+            raise CodegenUnsupported("indirect call")
+        if isinstance(e, a.MethodCall):
+            return self._gen_method(e)
+        if isinstance(e, a.FieldAccess):
+            return f"(({self._gen_expr(e.recv)}).{e.field})"
+        if isinstance(e, a.StructLit):
+            inits = ", ".join(
+                f".{n} = ({self._gen_expr(v)})" for n, v in e.fields)
+            return f"((nova_struct_{e.name}){{ {inits} }})"
+        raise CodegenUnsupported(type(e).__name__)
+
+    def _gen_method(self, e: a.MethodCall) -> str:
+        recv = self._gen_expr(e.recv)
+        if e.op == "print":
+            arg = self._gen_expr(e.args[0]) if e.args else '""'
+            return f"(nova_print({recv}, {arg}), 0)"
+        if e.op == "clock":
+            return f"nova_runtime_clock({recv})"
+        if e.op == "now":
+            return f"nova_clock_now({recv})"
+        raise CodegenUnsupported(f"method/operation `.{e.op}`")
 
 
-def compile_to_native(check_result: CheckResult, output_binary_path: str, opt_level: str = "-O3", target: str = "native") -> bool:
-    """Compile check_result into native binary or WASM artifact using clang."""
-    codegen = CCodeGen(check_result)
-    c_source = codegen.generate()
+def _type_name(te) -> str:
+    return getattr(te, "name", "Int") if te is not None else "Int"
 
-    with tempfile.NamedTemporaryFile(suffix=".c", delete=False) as tf:
-        tf.write(c_source.encode("utf-8"))
+
+def _children(e):
+    """Yield sub-expressions of an AST node for the feasibility walk."""
+    for attr in ("operand", "left", "right", "cond", "then", "els",
+                 "body", "value", "recv", "callee", "scrutinee", "iter"):
+        child = getattr(e, attr, None)
+        if isinstance(child, a.Node):
+            yield child
+    for attr in ("args", "elems", "stmts"):
+        for child in getattr(e, attr, []) or []:
+            if isinstance(child, a.Node):
+                yield child
+    if isinstance(e, a.Block) and e.tail is not None:
+        yield e.tail
+    if isinstance(e, a.StructLit):
+        for _, v in e.fields:
+            yield v
+    if isinstance(e, a.Match):
+        for arm in e.arms:
+            yield arm.body
+
+
+def compile_to_native(check_result: CheckResult, output_binary_path: str,
+                      opt_level: str = "-O2", target: str = "native") -> bool:
+    """Compile `check_result` to a native binary.
+
+    Raises `CodegenUnsupported` if the program uses constructs outside the
+    supported subset (or if `target` is wasm/wasi, which is not yet
+    implemented), or `FileNotFoundError` if `clang` is unavailable.
+    Returns True on success; raises `RuntimeError` if clang rejects the
+    generated C (which would be a backend bug).
+    """
+    if target in ("wasm", "wasi"):
+        # The generated C uses libc (stdio, string, time). A real WASM
+        # target needs a freestanding NOVA runtime and a component-model
+        # shim, neither of which exists yet. Rather than emit something
+        # that only links against a WASI sysroot that may not be
+        # installed, decline cleanly and let the driver fall back.
+        raise CodegenUnsupported(
+            "WASM target (needs a freestanding runtime — Milestone 3)")
+
+    c_source = CCodeGen(check_result).generate()
+
+    with tempfile.NamedTemporaryFile(suffix=".c", delete=False, mode="w",
+                                     encoding="utf-8") as tf:
+        tf.write(c_source)
         c_path = tf.name
 
     try:
-        if target in ("wasm", "wasi"):
-            wasm_target = "--target=wasm32-wasi" if target == "wasi" else "--target=wasm32"
-            cmd = ["clang", wasm_target, opt_level, "-Wno-everything", c_path, "-o", output_binary_path]
-        else:
-            cmd = ["clang", opt_level, c_path, "-o", output_binary_path]
+        cmd = ["clang", opt_level, "-Wno-everything",
+               c_path, "-o", output_binary_path]
         res = subprocess.run(cmd, capture_output=True, text=True)
         if res.returncode != 0:
-            # Fallback without sysroot if targeting standalone wasm
-            if target == "wasm":
-                cmd_fallback = ["clang", "--target=wasm32", "-nostdlib", "-Wl,--no-entry", "-Wl,--export-all", c_path, "-o", output_binary_path]
-                res_fb = subprocess.run(cmd_fallback, capture_output=True, text=True)
-                if res_fb.returncode == 0:
-                    return True
-            print(f"Compilation error ({target}):\n{res.stderr}")
-            return False
+            raise RuntimeError(
+                "NOVA native backend produced C that clang rejected "
+                "(this is a compiler bug):\n" + res.stderr)
         return True
     finally:
         if os.path.exists(c_path):
