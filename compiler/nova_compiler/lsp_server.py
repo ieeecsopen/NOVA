@@ -1,10 +1,13 @@
-"""Language Server Protocol (LSP) Server for NOVA (`nova lsp`).
+"""Language Server Protocol (LSP) server for NOVA (`nova lsp`).
 
-Implements standard JSON-RPC 2.0 protocol over stdio:
-- Diagnostics publishing on didOpen / didChange / didSave
-- Autocomplete for keywords, capabilities, and stdlib symbols
-- Hover type and effect row inspection
-- Document formatting
+JSON-RPC 2.0 over stdio. Implemented today:
+- Diagnostics on didOpen / didChange (runs the real checker)
+- Keyword / capability / core-type completion
+- Document formatting (delegates to `nova fmt`)
+
+Not implemented (the `initialize` response no longer advertises these):
+- Hover with real type/effect information
+- Go-to-definition, find-references
 """
 from __future__ import annotations
 
@@ -20,15 +23,13 @@ from .fmt import format_code
 KEYWORDS = [
     "fn", "let", "mut", "if", "else", "while", "for", "in",
     "match", "struct", "enum", "trait", "impl", "import",
-    "widen", "capability"
+    "widen", "capability", "pub", "self",
 ]
 
-CAPABILITIES = [
-    "Runtime", "Clock", "Filesystem", "Network", "Database",
-    "Random", "Process", "GPU", "AI", "Distributed", "Secret", "Unsafe"
-]
+# The capabilities that actually exist (std/prelude.nova).
+CAPABILITIES = ["Runtime", "Clock", "Filesystem", "Network"]
 
-STDLIB_TYPES = ["Int", "Bool", "String", "Option", "Result", "List"]
+STDLIB_TYPES = ["Int", "Bool", "String", "Unit", "Option", "Result", "List"]
 
 
 class NovaLSPServer:
@@ -71,9 +72,7 @@ class NovaLSPServer:
                     "capabilities": {
                         "textDocumentSync": 1,  # Full sync
                         "completionProvider": {"triggerCharacters": [".", ":", " "]},
-                        "hoverProvider": True,
                         "documentFormattingProvider": True,
-                        "definitionProvider": True,
                     }
                 }
             })
@@ -107,18 +106,6 @@ class NovaLSPServer:
                 "jsonrpc": "2.0",
                 "id": msg_id,
                 "result": items
-            })
-
-        elif method == "textDocument/hover":
-            self.send_response({
-                "jsonrpc": "2.0",
-                "id": msg_id,
-                "result": {
-                    "contents": {
-                        "kind": "markdown",
-                        "value": "**NOVA Symbol**\n\n*Capability-typed effect analysis verified.*"
-                    }
-                }
             })
 
         elif method == "textDocument/formatting":
