@@ -1,8 +1,9 @@
-"""The NOVA Native Compiler.
+"""The NOVA toolchain.
 
-Pipeline:
-  Source -> Lexer -> Parser -> AST -> Name Resolution -> Type & Effect Checking
-         -> HIR -> MIR -> C/LLVM Backend -> Native Executable
+The authoritative frontend and reference interpreter live in
+`verifier/refspec/`. This package is the `nova` CLI plus a best-effort
+native C backend for the first-order subset of the language. See
+`compiler/README.md`.
 """
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
