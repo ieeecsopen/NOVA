@@ -64,7 +64,7 @@ def main(argv: list[str] = None) -> int:
     build_p = subparsers.add_parser("build", help="Compile NOVA source into an optimized machine binary or WASM")
     build_p.add_argument("file", nargs="?", default="src/main.nova", help="Path to .nova source file (default: src/main.nova)")
     build_p.add_argument("-o", "--output", help="Output executable binary path")
-    build_p.add_argument("--target", default="native", choices=["native", "wasm", "wasi"], help="Compilation target (native, wasm, wasi)")
+    build_p.add_argument("--target", default="native", choices=["native", "wasm", "wasi"], help="Compilation target. `wasm`/`wasi` are not implemented yet (Milestone 3) and fall back to the interpreter-backed runner.")
     build_p.add_argument("--clean", action="store_true", help="Force clean compilation (bypass cache)")
     build_p.add_argument("--emit-hir", action="store_true", help="Print High-Level IR (HIR)")
     build_p.add_argument("--emit-mir", action="store_true", help="Print Mid-Level IR (MIR)")
@@ -186,8 +186,13 @@ def main(argv: list[str] = None) -> int:
         cache_label = "(cached)" if metrics and metrics.is_cached else "(fresh build)"
         print(f"\033[32m✓\033[0m Compiled {args.file} -> \033[1m{out}\033[0m {cache_label}")
         if metrics:
+            if metrics.backend == "native-c":
+                print("  • Backend:     native binary (C backend)")
+            else:
+                reason = metrics.fallback_reason or "unsupported construct"
+                print(f"  • Backend:     interpreter-backed runner ({reason})")
             print(f"  • Total time:  {metrics.total_time_ms:.2f} ms")
-            print(f"  • Binary size: {metrics.binary_size_bytes:,} bytes")
+            print(f"  • Artifact:    {metrics.binary_size_bytes:,} bytes")
         return 0
 
     elif args.command == "run":
@@ -275,17 +280,20 @@ def main(argv: list[str] = None) -> int:
         return 0
 
     elif args.command == "bench":
-        print(f"=== Benchmarking NOVA Compiler: {args.file} ===")
+        print(f"=== Benchmarking NOVA compiler: {args.file} ===")
         _, _, clean_m = compiler.build_file(args.file, force_clean=True)
         _, _, inc_m = compiler.build_file(args.file, force_clean=False)
         t0 = time.perf_counter()
         exit_code = compiler.run_file(args.file)
         t_run = (time.perf_counter() - t0) * 1000.0
 
-        print(f"  [1] Clean Compile Time:       {clean_m.total_time_ms:.2f} ms" if clean_m else "  [1] Clean Compile: failed")
-        print(f"  [2] Incremental Compile Time: {inc_m.total_time_ms:.2f} ms" if inc_m else "  [2] Incremental: failed")
-        print(f"  [3] Executable Binary Size:   {clean_m.binary_size_bytes:,} bytes" if clean_m else "  [3] Binary Size: -")
-        print(f"  [4] Native Execution Time:    {t_run:.2f} ms (exit code: {exit_code})")
+        print(f"  [1] Clean build:       {clean_m.total_time_ms:.2f} ms" if clean_m else "  [1] Clean build: failed")
+        print(f"  [2] Incremental build: {inc_m.total_time_ms:.2f} ms (cache hit)" if inc_m else "  [2] Incremental: failed")
+        print(f"  [3] Artifact size:     {clean_m.binary_size_bytes:,} bytes ({clean_m.backend})" if clean_m else "  [3] Artifact size: -")
+        print(f"  [4] Execution time:    {t_run:.2f} ms via reference interpreter (exit code: {exit_code})")
+        print()
+        print("  Note: these are wall-clock measurements on this machine. They are")
+        print("  not a comparison against other languages; see benchmarks/README.md.")
         return 0
 
     return 0
