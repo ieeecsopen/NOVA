@@ -1,91 +1,72 @@
-# NOVA Native Compiler (`nova`)
+# NOVA toolchain (`nova`)
 
-The production native compiler for the NOVA programming language.
+The developer-facing CLI for NOVA. It is a thin driver around two things:
 
----
+1. **`verifier/refspec/`** — the reference frontend and interpreter. This
+   is the authoritative implementation of the language: lexer, parser,
+   Hindley–Milner type inference, row-typed effect checking, capability
+   reachability analysis, and a tree-walking reference evaluator. Every
+   semantic rule lives here and is exercised by `tests/conformance/`.
 
-## 1. Compiler Architecture Pipeline
+2. **`compiler/nova_compiler/`** — the CLI (`nova <command>`), plus a
+   **best-effort** native C backend for the first-order subset of the
+   language.
+
+## Pipeline
 
 ```
 Source (.nova)
-     │
-     ▼
-Lexer (Tokenizer with span tracking)
-     │
-     ▼
-Parser (Recursive-descent producing AST)
-     │
-     ▼
-AST (Spans, Node IDs, Type Expressions)
-     │
-     ▼
-Name Resolution & Module Resolution (std.* + relative imports)
-     │
-     ▼
-Type Checking & Effect Inference
-     │
-     ▼
-Capability Reachability Analysis (Transitive closure capture validation)
-     │
-     ▼
-High-Level Intermediate Representation (HIR)
-     │ (Desugars pattern matches, monomorphizes generics, explicit captures)
-     ▼
-Mid-Level Intermediate Representation (MIR)
-     │ (Control Flow Graph, Basic Blocks, SSA, Linear Drop Elaboration)
-     ▼
-C / LLVM Native Backend (`clang -O3`)
-     │ (Generates machine code, links capability runtime)
-     ▼
-Native Executable (arm64 / x86_64 ELF/Mach-O)
+   │  verifier/refspec/  (authoritative)
+   ▼
+Lexer → Parser → AST → name/module resolution → type & effect inference
+   → capability reachability
+   │
+   ├─► nova check   — stop here, report diagnostics
+   ├─► nova run     — hand the checked AST to the reference interpreter
+   └─► nova build   — attempt native C codegen, else emit an
+                       interpreter-backed runner
 ```
 
----
+`HIR`/`MIR` (`hir.py`, `mir.py`) exist as **informational lowerings**
+surfaced by `--emit-hir` / `--emit-mir`. They are not on the execution
+path and are not a full IR yet.
 
-## 2. Compiler Toolchain Commands
+## The native C backend
 
-The `nova` binary provides the complete developer toolchain:
+`codegen_c.py` lowers a **supported subset** to C99 and links it with
+`clang`:
 
-### Type Check & Verify
-```bash
-nova check <file.nova>
+| Supported | Not yet lowered (falls back to the interpreter) |
+| :--- | :--- |
+| top-level `fn`s | enums, `match` |
+| `Int` `Bool` `String` `Unit` | closures, `for` |
+| `struct` types | generics, traits / `impl` |
+| `Runtime`, `Clock` | tuples, `List`, imports beyond the prelude |
+| arithmetic / comparison / `if` / `while` / `let mut` | |
+
+When a program uses anything in the right-hand column, `nova build`
+prints `Backend: interpreter-backed runner` and emits a small runnable
+artifact that executes the program through the reference interpreter. The
+program still runs and still returns the right value — it is just not a
+standalone machine binary.
+
+This is deliberate: the backend never emits C it cannot compile, so
+`nova build` never produces a broken binary.
+
+## Commands
+
 ```
-Validates syntax, type unification, and static capability reachability without code generation.
-
-### Build Native Executable
-```bash
-nova build <file.nova> [-o output_binary] [--clean]
+nova new <name>       scaffold a project
+nova check <file>     type- and effect-check
+nova run <file>       check and execute (reference interpreter)
+nova dev <file>       alias for run, for the inner loop
+nova build <file>     produce an executable artifact (native or runner)
+nova test [pattern]   run the conformance and prototype suites
+nova fmt / lint       format / lint .nova sources
+nova doc <path>       generate API docs
+nova add / remove / update / publish / deploy
+                      package-manifest helpers (no registry yet — see
+                      docs/known-issues.md P3)
+nova lsp              language server over stdio
+nova bench <file>     wall-clock build/run timings for one file
 ```
-Compiles source into an optimized native machine binary with incremental SHA-256 caching (`.nova_cache/`).
-
-### Run Program
-```bash
-nova run <file.nova> [args...]
-```
-Compiles and executes the native binary with zero developer friction.
-
-### Benchmark Compilation & Runtime
-```bash
-nova bench <file.nova>
-```
-Measures clean compile time, incremental compile time, binary size, and native execution latency.
-
----
-
-## 3. Benchmark Snapshot
-
-On Apple Silicon (M-series / Apple Clang):
-* **Clean Compile Time:** ~40–60 ms
-* **Incremental (Cached) Build:** ~0.25 ms
-* **Native Execution Time:** ~1.5–3.0 ms
-* **Binary Size:** ~33 KB (stripped standalone native executable)
-
----
-
-## 4. Diagnostics Engine
-
-Errors pinpoint exact source spans and emit actionable diagnostics with structural components:
-* **What:** Exact invariant breached (e.g. `E0105: closure captures un-annotated capability`).
-* **Where:** Source file, line, and column span pointer.
-* **Why:** The capability reference reached inside the function body.
-* **Fix:** Add the required effect label to the function signature or remove the capability capture.
