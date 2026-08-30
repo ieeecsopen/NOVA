@@ -159,12 +159,27 @@ an existing one.
       *(novelty claim withdrawn after Phase 0; see its §3.2)*
 - [x] Executable reference semantics: lexer, parser, capability
       reachability, type + effect checker, evaluator
-- [x] Conformance suite
+- [x] Conformance suite (47 tests)
+- [x] Prelude capabilities: `Runtime`, `Clock`, `Filesystem`, `Network`
+- [x] First-order native C backend + interpreter-backed fallback for the
+      rest (`nova build`)
+- [x] Toolchain benchmark harness (`benchmarks/challenge_suite.py`) —
+      wall-clock only; the language-level cost measurements RFC 0001 §9
+      wants still need a native code path
 - [ ] Rust compiler front end (second implementation) — blocked on toolchain
-- [ ] Benchmark harness (required before RFC 0001 → Accepted)
+- [ ] RFC 0001 open questions §11.1 / §11.2 (does effect derivation
+      survive abstraction?) — the gate that keeps Milestone 0 open
 
-**Exit:** RFC 0001 Accepted, both implementations agreeing on the suite,
-and open question §11.1 (does derivation survive abstraction?) answered.
+**Exit:** RFC 0001 Accepted, a second implementation agreeing on the
+conformance suite, and §11.1 answered.
+
+> **Note on the "1.0 Genesis" commits.** An earlier series of commits
+> tagged a `v1.0.0` release and rewrote the README and several docs in
+> the voice of a finished platform. That was inaccurate — see
+> [CONSTITUTION.md](CONSTITUTION.md) Article XII. The 0.2 honesty pass
+> re-scoped the version, the README, the benchmarks, and added a status
+> banner to the affected design documents. The tag is retained for
+> history but does not denote a real 1.0.
 
 ## Milestone 1 — Memory discipline *(designed and prototyped)*
 
