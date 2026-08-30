@@ -7,20 +7,31 @@ on:
     branches: [ main ]
 
 jobs:
-  test:
-    name: Conformance & Master Verification Suite
-    runs-on: ubuntu-latest
+  verify:
+    name: Verification suite (${{ matrix.os }}, Python ${{ matrix.python }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python: ["3.10", "3.12"]
     steps:
-      - name: Checkout Code
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Python 3.11
+      - name: Set up Python ${{ matrix.python }}
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: ${{ matrix.python }}
 
-      - name: Install Clang & LLVM
-        run: sudo apt-get update && sudo apt-get install -y clang llvm
+      - name: Install clang (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y clang
 
-      - name: Run Master Verification Suite
+      - name: Run verification suite
         run: ./tools/check-all.sh
+        env:
+          PYTHON: python3
+
+      - name: Toolchain benchmark smoke test
+        run: python3 benchmarks/challenge_suite.py --json > /dev/null
