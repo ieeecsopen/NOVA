@@ -1,144 +1,124 @@
-"""NOVA Permanent Public Challenge Benchmark Suite.
+"""NOVA toolchain benchmark.
 
-Executes across all 7 Challenge Categories:
-1. Systems (HTTP, CLI, File processing)
-2. Data (Serialization, Database, Streaming)
-3. Concurrency (Worker pool, Parallel join, Channels)
-4. Distributed (Saga orchestration, Fault recovery)
-5. Full-Stack (Session auth, Multi-tier CRUD)
-6. AI Governance (Budget enforcement, Token counters)
-7. Compiler (Lexer, Parser, Typecheck, Native Codegen)
+Measures wall-clock time for the operations the toolchain actually
+performs today, on the real example programs:
+
+  * `nova check`  — lex + parse + type/effect/capability checking
+  * `nova build`  — the above, plus codegen (native C subset or the
+                    interpreter-backed runner)
+  * `nova run`    — the above, plus execution via the reference interpreter
+
+This is a measurement of *this machine running this toolchain*. It is not
+a comparison against other languages: the constructs such a comparison
+would need (native tasks, channels, compiled loops) do not have a native
+code path yet. See README.md for why there is no such table.
+
+Usage:  python3 benchmarks/challenge_suite.py [--json]
 """
-import concurrent.futures
+from __future__ import annotations
+
 import json
 import os
-import queue
+import statistics
 import subprocess
 import sys
 import time
 
-
-def bench_systems() -> dict:
-    t0 = time.perf_counter()
-    # 10,000 synthetic HTTP route decodes
-    for i in range(10_000):
-        _ = {"status": 200, "path": "/api/users", "body": "OK"}
-    t_http = (time.perf_counter() - t0) * 1000.0
-    return {"http_10k_ops_ms": round(t_http, 2), "ops_per_sec": int(10_000 / (t_http / 1000.0))}
+REPO_ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
+NOVA = os.path.join(REPO_ROOT, "nova")
+EXAMPLES = os.path.join(REPO_ROOT, "examples")
+REPEATS = 5
 
 
-def bench_data() -> dict:
-    t0 = time.perf_counter()
-    # 50,000 record streaming aggregations
-    total = sum(i * 2 for i in range(50_000) if i % 2 == 0)
-    t_data = (time.perf_counter() - t0) * 1000.0
-    return {"data_stream_50k_ms": round(t_data, 2), "ops_per_sec": int(50_000 / (t_data / 1000.0))}
-
-
-def bench_concurrency() -> dict:
-    t0 = time.perf_counter()
-    with concurrent.futures.ThreadPoolExecutor(max_workers=8) as ex:
-        futures = [ex.submit(lambda x: x * 2, i) for i in range(50_000)]
-        _ = [f.result() for f in futures]
-    t_conc = (time.perf_counter() - t0) * 1000.0
-    return {"task_spawn_50k_ms": round(t_conc, 2), "tasks_per_sec": int(50_000 / (t_conc / 1000.0))}
-
-
-def bench_distributed() -> dict:
-    t0 = time.perf_counter()
-    # 5,000 simulated 3-step saga orchestrations
-    for i in range(5_000):
-        step1 = True
-        step2 = True
-        step3 = True
-        _ = step1 and step2 and step3
-    t_dist = (time.perf_counter() - t0) * 1000.0
-    return {"saga_5k_ops_ms": round(t_dist, 2), "sagas_per_sec": int(5_000 / (t_dist / 1000.0))}
-
-
-def bench_fullstack() -> dict:
-    t0 = time.perf_counter()
-    for i in range(10_000):
-        session = {"user_id": i, "is_auth": True}
-        if session["is_auth"]:
-            _ = {"vnode": "div", "db_tx": "commit"}
-    t_fs = (time.perf_counter() - t0) * 1000.0
-    return {"fullstack_10k_cycles_ms": round(t_fs, 2), "cycles_per_sec": int(10_000 / (t_fs / 1000.0))}
-
-
-def bench_ai_governance() -> dict:
-    t0 = time.perf_counter()
-    # 50,000 budget token boundary evaluations
-    max_tokens = 20_000
-    for tokens in range(50_000):
-        _ = tokens < max_tokens
-    t_ai = (time.perf_counter() - t0) * 1000.0
-    return {"budget_eval_50k_ms": round(t_ai, 2), "evals_per_sec": int(50_000 / (t_ai / 1000.0))}
-
-
-def bench_compiler() -> dict:
-    repo_root = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
-    sample_file = os.path.join(repo_root, "examples", "hello.nova")
-    
-    t0 = time.perf_counter()
-    res = subprocess.run(["./nova", "build", sample_file, "-o", "/tmp/nova_bench_bin", "--clean"],
-                         cwd=repo_root, capture_output=True, text=True)
-    t_clean = (time.perf_counter() - t0) * 1000.0
-
-    t1 = time.perf_counter()
-    res_inc = subprocess.run(["./nova", "build", sample_file, "-o", "/tmp/nova_bench_bin"],
-                             cwd=repo_root, capture_output=True, text=True)
-    t_inc = (time.perf_counter() - t1) * 1000.0
-
-    bin_size = os.path.getsize("/tmp/nova_bench_bin") if os.path.exists("/tmp/nova_bench_bin") else 33544
-
+def _time(cmd: list[str], repeats: int = REPEATS) -> dict:
+    samples = []
+    ok = True
+    for _ in range(repeats):
+        t0 = time.perf_counter()
+        res = subprocess.run(cmd, cwd=REPO_ROOT, capture_output=True, text=True)
+        samples.append((time.perf_counter() - t0) * 1000.0)
+        ok = ok and res.returncode == 0
     return {
-        "clean_compile_ms": round(t_clean, 2),
-        "incremental_compile_ms": round(t_inc, 2),
-        "binary_size_bytes": bin_size
+        "median_ms": round(statistics.median(samples), 2),
+        "min_ms": round(min(samples), 2),
+        "ok": ok,
     }
 
 
-def run_full_suite() -> dict:
-    print("\033[1m=== NOVA PERMANENT PUBLIC CHALLENGE BENCHMARK SUITE ===\033[0m\n")
-    results = {}
+def _sample_files() -> list[str]:
+    files = []
+    for name in sorted(os.listdir(EXAMPLES)):
+        if name.endswith(".nova") and "rejected" not in name:
+            files.append(os.path.join(EXAMPLES, name))
+    return files
 
-    print("Running [1/7] Systems Benchmark (HTTP & CLI)...")
-    results["systems"] = bench_systems()
-    print(f"  • Result: {results['systems']['http_10k_ops_ms']} ms ({results['systems']['ops_per_sec']:,} ops/sec)")
 
-    print("Running [2/7] Data Processing Benchmark (Streaming ETL)...")
-    results["data"] = bench_data()
-    print(f"  • Result: {results['data']['data_stream_50k_ms']} ms ({results['data']['ops_per_sec']:,} ops/sec)")
+def bench_check(files: list[str]) -> dict:
+    out = {}
+    for f in files:
+        out[os.path.basename(f)] = _time([NOVA, "check", f])
+    return out
 
-    print("Running [3/7] Concurrency Benchmark (50,000 Tasks)...")
-    results["concurrency"] = bench_concurrency()
-    print(f"  • Result: {results['concurrency']['task_spawn_50k_ms']} ms ({results['concurrency']['tasks_per_sec']:,} tasks/sec)")
 
-    print("Running [4/7] Distributed Benchmark (5,000 Sagas)...")
-    results["distributed"] = bench_distributed()
-    print(f"  • Result: {results['distributed']['saga_5k_ops_ms']} ms ({results['distributed']['sagas_per_sec']:,} sagas/sec)")
+def bench_build_cache(sample: str) -> dict:
+    """Clean vs. cached build for one file."""
+    clean = _time([NOVA, "build", sample, "-o", "/tmp/nova_bench_out",
+                   "--clean"], repeats=3)
+    cached = _time([NOVA, "build", sample, "-o", "/tmp/nova_bench_out"],
+                   repeats=REPEATS)
+    return {"clean": clean, "cached": cached}
 
-    print("Running [5/7] Full-Stack Benchmark (10,000 Multi-Tier Cycles)...")
-    results["fullstack"] = bench_fullstack()
-    print(f"  • Result: {results['fullstack']['fullstack_10k_cycles_ms']} ms ({results['fullstack']['cycles_per_sec']:,} cycles/sec)")
 
-    print("Running [6/7] AI Governance Benchmark (50,000 Budget Checks)...")
-    results["ai_governance"] = bench_ai_governance()
-    print(f"  • Result: {results['ai_governance']['budget_eval_50k_ms']} ms ({results['ai_governance']['evals_per_sec']:,} checks/sec)")
+def bench_run(files: list[str]) -> dict:
+    out = {}
+    for f in files:
+        out[os.path.basename(f)] = _time([NOVA, "run", f], repeats=3)
+    return out
 
-    print("Running [7/7] Native Compiler Benchmark...")
-    results["compiler"] = bench_compiler()
-    print(f"  • Clean Build:       {results['compiler']['clean_compile_ms']} ms")
-    print(f"  • Incremental Build: {results['compiler']['incremental_compile_ms']} ms")
-    print(f"  • Binary Footprint:  {results['compiler']['binary_size_bytes']:,} bytes")
 
-    print("\n\033[32m✓\033[0m All 7 Challenge Categories completed successfully.\n")
-    return results
+def main(argv: list[str]) -> int:
+    as_json = "--json" in argv
+    files = _sample_files()
+    hello = os.path.join(EXAMPLES, "hello.nova")
+
+    if not as_json:
+        print("=== NOVA toolchain benchmark ===")
+        print(f"repo: {REPO_ROOT}")
+        print(f"samples: {len(files)} example programs, median of {REPEATS} runs\n")
+
+    check = bench_check(files)
+    build = bench_build_cache(hello)
+    run = bench_run(files)
+
+    check_med = statistics.median(v["median_ms"] for v in check.values())
+    run_med = statistics.median(v["median_ms"] for v in run.values())
+
+    summary = {
+        "check_median_ms_across_examples": round(check_med, 2),
+        "run_median_ms_across_examples": round(run_med, 2),
+        "build_hello_clean_ms": build["clean"]["median_ms"],
+        "build_hello_cached_ms": build["cached"]["median_ms"],
+        "per_file": {"check": check, "run": run},
+        "note": ("Wall-clock on this machine. Not a cross-language "
+                 "comparison — see README.md."),
+    }
+
+    if as_json:
+        json.dump(summary, sys.stdout, indent=2)
+        print()
+    else:
+        print(f"  nova check   median across examples : {check_med:.2f} ms")
+        print(f"  nova run     median across examples : {run_med:.2f} ms")
+        print(f"  nova build hello.nova  (clean)      : {build['clean']['median_ms']:.2f} ms")
+        print(f"  nova build hello.nova  (cached)     : {build['cached']['median_ms']:.2f} ms")
+        print()
+        print("  Wall-clock on this machine. Not a cross-language comparison.")
+
+    with open(os.path.join(REPO_ROOT, "benchmarks", "results.json"),
+              "w", encoding="utf-8") as f:
+        json.dump(summary, f, indent=2)
+    return 0
 
 
 if __name__ == "__main__":
-    data = run_full_suite()
-    with open("benchmarks/results.json", "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2)
-    print("Raw benchmark results saved to \033[1mbenchmarks/results.json\033[0m")
+    raise SystemExit(main(sys.argv[1:]))
