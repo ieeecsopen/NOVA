@@ -6,3 +6,20 @@ target/
 dist/
 bin/
 nova.lock
+
+# macOS
+.DS_Store
+
+# Editor
+*.swp
+*~
+.vscode/
+!editors/vscode/
+
+# Build artifacts produced by `nova build` at the repo root
+/hello
+/*.out
+/*.wasm
+
+# Local launch materials
+submissions/
