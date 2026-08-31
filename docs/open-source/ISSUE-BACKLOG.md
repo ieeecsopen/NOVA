@@ -9,22 +9,23 @@
 
 Every major subsystem in NOVA is audited and classified into one of eight states:
 
-| Subsystem | Authoritative Codebase | Implementation State | Active Work Area |
+| Subsystem | Authoritative Codebase | Implementation State | Notes |
 | :--- | :--- | :--- | :--- |
-| **CLI & Driver** | `compiler/nova_compiler/cli.py` | `IMPLEMENTED` | `nova new`, `dev`, `check`, `build`, `run`, `test`, `fmt`, `lint`, `doc` |
-| **Lexer & Parser** | `verifier/refspec/lexer.py`, `parser.py` | `IMPLEMENTED` | EBNF grammar, monotonic span tagging, AST construction |
-| **Type Inference** | `verifier/refspec/check.py` | `IMPLEMENTED` | Hindley-Milner bidirectional inference, generics, traits |
-| **Effect Row Lattice** | `verifier/refspec/check.py` | `IMPLEMENTED` | Pure defaults, row polymorphism, label saturation |
-| **Capability Engine** | `verifier/refspec/reachability.py` | `IMPLEMENTED` | Transitive reachability, laundering defense, zero ambient authority |
-| **Memory Model** | `regionlab/checker.py` | `PROTOTYPE` | Region XOR model (Shared Read XOR Exclusive Write); 14/14 tests |
-| **IR Lowering** | `compiler/nova_compiler/hir.py`, `mir.py` | `IMPLEMENTED` | AST $\to$ HIR $\to$ MIR lowering, CFG basic blocks |
-| **Codegen & WASM** | `compiler/nova_compiler/codegen_c.py` | `IMPLEMENTED` | C99 / LLVM `clang -O3` native & WebAssembly Component Model |
-| **Task Scheduler** | `compiler/nova_compiler/` | `PARTIALLY IMPLEMENTED` | Chase-Lev work-stealing, structured concurrency, channels |
-| **Package Manager** | `compiler/nova_compiler/pkg.py` | `IMPLEMENTED` | `nova.toml`, `nova.lock`, SHA-256 integrity, capability bounds |
-| **Language Server** | `compiler/nova_compiler/lsp_server.py` | `IMPLEMENTED` | JSON-RPC 2.0 LSP, diagnostics, hover, autocomplete, formatting |
-| **Self-Hosting** | `src/` | `PARTIALLY IMPLEMENTED` | Stage 1 self-hosted compiler & stdlib compiling via Stage 0 |
-| **AI Governance** | `docs/ai/` | `SPECIFICATION ONLY` | Sandboxed agents, zero implicit authority, financial budget meters |
-| **Adaptive Execution** | `docs/adaptive/` | `RESEARCH` | Multi-strategy execution (CPU/GPU/Remote); marked experimental |
+| **CLI & Driver** | `compiler/nova_compiler/cli.py` | `WORKING` | `nova new`, `dev`, `check`, `build`, `run`, `test`, `fmt`, `lint`, `doc` |
+| **Lexer & Parser** | `verifier/refspec/lexer.py`, `parser.py` | `WORKING` | recursive descent, spans on every node |
+| **Type Inference** | `verifier/refspec/check.py` | `WORKING` | Hindley-Milner, generics, traits (limits: known-issues P1–P2) |
+| **Effect Row Lattice** | `verifier/refspec/check.py` | `WORKING` | pure defaults, row polymorphism (one row var/fn: known-issues I1) |
+| **Capability Engine** | `verifier/refspec/reachability.py` + `check.py` | `WORKING` | laundering defense through closures and struct fields |
+| **Reference Interpreter** | `verifier/refspec/eval.py` | `WORKING — authoritative` | executes checked programs; `Runtime`/`Clock`/`Filesystem`/`Network` |
+| **Memory Model** | `regionlab/checker.py` | `PROTOTYPE, NOT INTEGRATED` | Region XOR; 14/14 tests; separate language (`.rlab`) |
+| **IR Lowering** | `compiler/nova_compiler/hir.py`, `mir.py` | `SCAFFOLDING` | `--emit-hir`/`--emit-mir` only; no desugaring/monomorphization yet |
+| **Native Codegen** | `compiler/nova_compiler/codegen_c.py` | `FIRST-ORDER SUBSET` | native C for top-level fns / `Int`/`Bool`/`String`/`struct`; falls back to the interpreter for the rest. No WASM (known-issues C1) |
+| **Task Scheduler** | — | `NOT STARTED` | no concurrency runtime exists (Milestone 4) |
+| **Package Manager** | `compiler/nova_compiler/pkg.py` | `MANIFEST HELPERS ONLY` | no registry, no resolver, no fetch (see `package-manager/README.md`) |
+| **Language Server** | `compiler/nova_compiler/lsp_server.py` | `MINIMAL` | diagnostics + completion + formatting; no hover/go-to-def |
+| **Self-Hosting** | `src/` | `~90-LINE SKETCH` | valid NOVA that does nothing; see `src/README.md` |
+| **AI Governance** | `docs/ai/` | `DESIGN ONLY` | no implementation |
+| **Adaptive Execution** | `docs/adaptive/` | `DESIGN ONLY` | no implementation |
 
 ---
 
