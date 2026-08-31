@@ -5,6 +5,42 @@ it is a *specification* gap (the RFC does not say what should happen), an
 *implementation* gap (the RFC says, the code does not do it), or a
 *diagnostic* gap (both are correct, the error message is poor).
 
+## C1 — Native C backend covers only the first-order subset *(implementation)*
+
+`compiler/nova_compiler/codegen_c.py` lowers top-level `fn`s over `Int` /
+`Bool` / `String` / `Unit` / `struct`, with `Runtime` and `Clock`, to a
+real native binary. Enums, `match`, closures, generics, traits, `List`,
+`for` and tuples are **not lowered** — `nova build` detects this before
+emitting any C, prints `Backend: interpreter-backed runner`, and produces
+a runnable artifact that executes the program through the reference
+interpreter instead. The program runs and returns the right value; it is
+just not a standalone machine binary. The interpreter
+(`verifier/refspec/eval.py`) is the authoritative execution engine
+regardless. Extending the backend is Milestone 3 work.
+
+## C2 — HIR/MIR are informational, not a real IR *(implementation)*
+
+`hir.py` and `mir.py` are surfaced by `--emit-hir` / `--emit-mir` and
+run as a validation pass, but they are not on the execution path and do
+not yet desugar pattern matches, monomorphize generics, or elaborate
+drops. The names are aspirational; the substance is Milestone 3.
+
+## C3 — No string operations *(specification, deliberate for v0.2)*
+
+`String` supports only `==` / `!=` and pattern matching. There is no
+concatenation, length, slicing or formatting — adding a fragment of a
+string library would contradict the same v0.2 discipline that makes
+collections persistent-only (`std/list.nova`). A `String` operation set
+needs its own RFC alongside the memory model (Milestone 1), because a
+growable string is a mutable heap value.
+
+## C4 — `attenuate` still not implemented *(implementation)*
+
+Unchanged from I5 below. `Filesystem` and `Network` now exist in the
+prelude (minted from `Runtime`, each use visible in the row), but there
+is still no way to hand out a *reduced* capability — only the whole
+token. RFC 0001 §4.6 defines `attenuate`; it is deferred to Milestone 2.
+
 ## D1 — Let-bound closures blame the wrong expression *(diagnostic)*
 
 ```nova
@@ -58,11 +94,17 @@ Constitution Article IX requires two. There is one. The Rust compiler is
 not started, so nothing currently disagrees with the reference semantics,
 which means the specification has not actually been tested for ambiguity.
 
-## I4 — No benchmarks *(implementation)*
+## I4 — Benchmarks measure the toolchain, not the language *(implementation)*
 
-RFC 0001 §9 makes cost claims that are unmeasured, and §12 makes
-benchmarks a prerequisite for the RFC being Accepted. `benchmarks/` is
-empty.
+RFC 0001 §9 makes cost claims that remain largely unmeasured. What
+`benchmarks/` now contains is a wall-clock harness for the *toolchain*
+(`nova build` / `nova run` timings via `challenge_suite.py`) plus a
+Python micro-benchmark of the host's threading primitives
+(`concurrency_bench.py`) — the latter is **not** a measurement of NOVA
+and is labelled as such in `benchmarks/README.md`. There is no
+cross-language comparison, and there should not be one until there is a
+native code path for the constructs being compared. §12's "benchmarks
+before Accepted" bar is not met.
 
 ## I5 — Attenuation is specified but not implemented *(implementation)*
 
