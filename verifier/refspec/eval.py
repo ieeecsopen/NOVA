@@ -25,6 +25,7 @@ escaping values. See RFC 0005 §4 for the full argument.
 """
 from __future__ import annotations
 
+import os
 import time
 from dataclasses import dataclass, field
 
@@ -123,14 +124,66 @@ class Interpreter:
         clock = CapValue("Clock", {
             "now": lambda: (time.monotonic_ns() - self._t0) // 1_000_000,
         })
+        filesystem = CapValue("Filesystem", {
+            "read": self._fs_read,
+            "write": self._fs_write,
+            "exists": self._fs_exists,
+        })
+        network = CapValue("Network", {
+            "get": lambda url: self._net(url, None),
+            "post": lambda url, body: self._net(url, body),
+        })
         return CapValue("Runtime", {
             "clock": lambda: clock,
+            "filesystem": lambda: filesystem,
+            "network": lambda: network,
             "print": self._print,
         })
 
     def _print(self, line):
         self.out.append(line)
         return UNIT_VALUE
+
+    # The reference interpreter grounds `Filesystem` in the real disk,
+    # relative to the working directory, so file-touching programs can
+    # actually be run and their behaviour observed. This is the reference
+    # semantics, not a production sandbox — a real deployment substitutes
+    # a policy-enforcing host (see docs/runtime/RESOURCE-MODEL.md).
+    def _fs_read(self, path):
+        try:
+            with open(path, "r", encoding="utf-8") as fh:
+                return fh.read()
+        except OSError as ex:
+            raise NovaRuntimeError(f"Filesystem.read({path!r}): {ex}")
+
+    def _fs_write(self, path, contents):
+        try:
+            data = contents.encode("utf-8")
+            with open(path, "wb") as fh:
+                fh.write(data)
+            return len(data)
+        except OSError as ex:
+            raise NovaRuntimeError(f"Filesystem.write({path!r}): {ex}")
+
+    def _fs_exists(self, path):
+        return os.path.exists(path)
+
+    # `Network` is inert by default: the reference interpreter does not
+    # make outbound requests. Setting NOVA_ALLOW_NETWORK=1 opts in and
+    # uses the standard library. Kept deliberately conservative so that
+    # running an untrusted example can never reach the network silently.
+    def _net(self, url, body):
+        if os.environ.get("NOVA_ALLOW_NETWORK") != "1":
+            raise NovaRuntimeError(
+                f"Network access to {url!r} is disabled in the reference "
+                "interpreter. Set NOVA_ALLOW_NETWORK=1 to enable it.")
+        import urllib.request
+        try:
+            data = body.encode("utf-8") if body is not None else None
+            with urllib.request.urlopen(url, data=data, timeout=10) as resp:
+                return resp.read().decode("utf-8", "replace")
+        except Exception as ex:  # noqa: BLE001 - surface any transport error
+            raise NovaRuntimeError(f"Network request to {url!r} failed: {ex}")
 
     # ------------------------------------------------------------ run
     def run_main(self):
