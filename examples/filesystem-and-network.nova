@@ -1,0 +1,24 @@
+// Filesystem and Network are prelude capabilities, minted from `Runtime`
+// exactly like `Clock`. Every use is visible in the effect row: this
+// function's signature says, precisely, that it may read the disk and
+// talk to the console, and nothing else.
+//
+// `nova run` grounds `Filesystem` in the real working directory. The
+// reference interpreter refuses `Network` unless NOVA_ALLOW_NETWORK=1,
+// so an untrusted example can never reach the network silently.
+
+fn config_exists(rt: Runtime) -> Bool ! {Runtime, Filesystem} {
+    let fs = rt.filesystem();
+    fs.exists("nova.toml")
+}
+
+fn report(rt: Runtime, present: Bool) -> Int ! {Runtime} {
+    let msg = if present { "found nova.toml" } else { "no nova.toml here" };
+    rt.print(msg);
+    if present { 0 } else { 1 }
+}
+
+fn main(rt: Runtime) -> Int ! {Runtime, Filesystem} {
+    let present = config_exists(rt);
+    report(rt, present)
+}
