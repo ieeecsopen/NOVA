@@ -1,0 +1,21 @@
+//! expect: ok
+//! sig: check_config = (Runtime) -> Bool ! {Filesystem, Runtime}
+//! sig: fetch = (Runtime, String) -> String ! {Network, Runtime}
+// The prelude declares `Filesystem` and `Network` alongside `Clock`.
+// Each is minted from `Runtime` and each use shows up in the row, so a
+// function's signature states exactly which real-world authorities its
+// body can reach.
+
+fn check_config(rt: Runtime) -> Bool ! {Runtime, Filesystem} {
+    let fs = rt.filesystem();
+    fs.exists("nova.toml")
+}
+
+fn fetch(rt: Runtime, url: String) -> String ! {Runtime, Network} {
+    let net = rt.network();
+    net.get(url)
+}
+
+fn main(rt: Runtime) -> Int ! {Runtime, Filesystem} {
+    if check_config(rt) { 0 } else { 1 }
+}
