@@ -1,5 +1,19 @@
 # NOVA — Raw Benchmark Telemetry & Competitor Analysis
 
+<!-- STATUS-BANNER -->
+> **Status note (added in the 0.2 honesty pass).** This document is part
+> of NOVA's *design record*. It was written in the aspirational voice of
+> a finished 1.0 platform. **NOVA is a 0.2 research preview.** What is
+> actually built and tested is a frontend type/effect/capability checker,
+> a reference interpreter, a first-order native C backend, and the
+> `regionlab` memory-model prototype. Everything here about a distributed
+> runtime, a WASM UI layer, AI-agent governance, a package registry,
+> self-hosting, or cross-language performance is **design, not
+> implementation**. See [`README.md`](../../README.md),
+> [`ROADMAP.md`](../../ROADMAP.md) and
+> [`docs/known-issues.md`](../known-issues.md) for the real state.
+
+
 **Status:** Permanent Benchmark Specification  
 **Cross-References:** [CHALLENGE-BENCHMARKS.md](CHALLENGE-BENCHMARKS.md), [BENCHMARK-METHODOLOGY.md](BENCHMARK-METHODOLOGY.md), [VALIDATION-REPORT.md](VALIDATION-REPORT.md)
 
