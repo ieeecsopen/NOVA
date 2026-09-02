@@ -1,31 +1,33 @@
-# NOVA Language Server Protocol (LSP)
+# NOVA Language Server
 
-The official Language Server Protocol implementation for the NOVA programming language.
+A minimal LSP server. The implementation lives in
+[`compiler/nova_compiler/lsp_server.py`](../compiler/nova_compiler/lsp_server.py);
+`lsp/server.py` here is a thin `python3 -m lsp.server` entry point that
+delegates to it.
 
----
+## Implemented today
 
-## 1. Capabilities Supported
+* **Diagnostics** on `didOpen` / `didChange` — runs the real checker and
+  reports the rendered error.
+* **Completion** — keywords, the four prelude capabilities (`Runtime`,
+  `Clock`, `Filesystem`, `Network`), and core type names.
+* **Formatting** — `textDocument/formatting`, delegates to `nova fmt`.
 
-* **Diagnostics:** Inline compiler error reporting on open/edit/save with span underlines (`textDocument/publishDiagnostics`).
-* **Autocomplete:** Context-aware completion for keywords, capability identifiers (`Clock`, `Filesystem`, `Network`), types, and stdlib helpers (`textDocument/completion`).
-* **Hover:** Type signature and inferred effect row inspection (`textDocument/hover`).
-* **Formatting:** Canonical 4-space indentation and effect row formatting (`textDocument/formatting`).
-* **Go-to-Definition & References:** Symbol navigation (`textDocument/definition`).
+## Not implemented
 
----
+* Hover with real type / effect-row information.
+* Go-to-definition, find-references, rename.
+* Incremental sync (the server takes full-document sync only).
 
-## 2. Running the LSP Server
+These are straightforward follow-ups against the existing checker, and
+are good contributor tasks.
+
+## Running
 
 ```bash
-nova lsp
-```
-or directly via Python:
-```bash
-python3 -m lsp.server
+nova lsp                 # via the toolchain
+python3 -m lsp.server    # directly
 ```
 
----
-
-## 3. Editor Integration
-
-See `editors/vscode/` for the complete VS Code extension manifest, syntax grammar, and language configuration.
+See [`editors/vscode/`](../editors/vscode/) for the VS Code extension
+(syntax grammar + a client that launches `nova lsp`).
