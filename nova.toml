@@ -1,8 +1,8 @@
 [package]
 name = "nova"
-version = "1.0.0"
+version = "0.2.0"
 edition = "2026"
-description = "NOVA 1.0 Genesis: A Constraint-Native Programming Language & Unified Application Platform"
+description = "NOVA 0.2 — a constraint-native programming language (research preview)"
 
 [dependencies]
 # Example:
