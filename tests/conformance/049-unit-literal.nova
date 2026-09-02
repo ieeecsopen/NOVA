@@ -1,0 +1,16 @@
+//! expect: ok
+//! sig: nothing = () -> Unit
+//! sig: via_let = () -> Unit
+//! stdout: unit
+//! exit: 0
+// `()` is the unit literal, not an empty tuple: it has the primitive
+// type `Unit` (TYPE-SYSTEM.md), can be bound and compared like any other
+// value, and a `Unit`-returning function may return it explicitly.
+
+fn nothing() -> Unit { () }
+fn via_let() -> Unit { let u = (); u }
+
+fn main(rt: Runtime) -> Int ! {Runtime} {
+    rt.print("unit");
+    if nothing() == via_let() { 0 } else { 1 }
+}
