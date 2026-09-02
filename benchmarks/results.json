@@ -1,253 +1,374 @@
 {
-  "check_median_ms_across_examples": 120.7,
-  "run_median_ms_across_examples": 121.47,
-  "build_hello_clean_ms": 168.24,
-  "build_hello_cached_ms": 121.12,
+  "check_median_ms_across_examples": 823.1,
+  "run_median_ms_across_examples": 600.59,
+  "build_hello_clean_ms": 753.71,
+  "build_hello_cached_ms": 800.07,
   "per_file": {
     "check": {
       "authority.nova": {
-        "median_ms": 124.98,
-        "min_ms": 120.41,
+        "median_ms": 1477.18,
+        "min_ms": 915.41,
         "ok": true
       },
       "campus-platform.nova": {
-        "median_ms": 119.96,
-        "min_ms": 119.65,
+        "median_ms": 1301.78,
+        "min_ms": 474.14,
         "ok": true
       },
       "cli-program.nova": {
-        "median_ms": 121.17,
-        "min_ms": 119.44,
+        "median_ms": 796.2,
+        "min_ms": 786.3,
         "ok": true
       },
       "combined-request-handler.nova": {
-        "median_ms": 120.92,
-        "min_ms": 119.86,
+        "median_ms": 807.39,
+        "min_ms": 694.73,
         "ok": true
       },
       "enterprise-platform.nova": {
-        "median_ms": 120.02,
-        "min_ms": 119.63,
+        "median_ms": 1186.36,
+        "min_ms": 580.76,
         "ok": true
       },
       "enums-and-pattern-matching.nova": {
-        "median_ms": 121.46,
-        "min_ms": 119.67,
+        "median_ms": 752.83,
+        "min_ms": 556.96,
         "ok": true
       },
       "failure-lifecycle.nova": {
-        "median_ms": 120.49,
-        "min_ms": 119.38,
+        "median_ms": 838.81,
+        "min_ms": 536.04,
         "ok": true
       },
       "filesystem-and-network.nova": {
-        "median_ms": 120.16,
-        "min_ms": 119.22,
+        "median_ms": 1113.19,
+        "min_ms": 595.44,
         "ok": true
       },
       "generic-box-and-trait.nova": {
-        "median_ms": 119.94,
-        "min_ms": 119.05,
+        "median_ms": 1259.15,
+        "min_ms": 610.52,
         "ok": true
       },
       "generic-collection-list.nova": {
-        "median_ms": 120.25,
-        "min_ms": 119.27,
+        "median_ms": 632.07,
+        "min_ms": 400.68,
         "ok": true
       },
       "generics-basics.nova": {
-        "median_ms": 119.83,
-        "min_ms": 119.49,
+        "median_ms": 745.45,
+        "min_ms": 447.04,
         "ok": true
       },
       "hello.nova": {
-        "median_ms": 119.52,
-        "min_ms": 118.64,
+        "median_ms": 759.19,
+        "min_ms": 578.11,
         "ok": true
       },
       "http-like.nova": {
-        "median_ms": 119.82,
-        "min_ms": 118.56,
+        "median_ms": 987.79,
+        "min_ms": 602.69,
         "ok": true
       },
       "mutability-and-loops.nova": {
-        "median_ms": 120.96,
-        "min_ms": 119.56,
+        "median_ms": 1533.22,
+        "min_ms": 1061.89,
         "ok": true
       },
       "option-basics.nova": {
-        "median_ms": 122.2,
-        "min_ms": 120.59,
+        "median_ms": 1038.31,
+        "min_ms": 870.46,
         "ok": true
       },
       "recursive-list-processing.nova": {
-        "median_ms": 121.4,
-        "min_ms": 120.62,
+        "median_ms": 982.0,
+        "min_ms": 385.95,
         "ok": true
       },
       "result-error-handling.nova": {
-        "median_ms": 120.7,
-        "min_ms": 120.42,
+        "median_ms": 665.3,
+        "min_ms": 533.78,
         "ok": true
       },
       "retry.nova": {
-        "median_ms": 121.6,
-        "min_ms": 119.56,
+        "median_ms": 998.36,
+        "min_ms": 673.61,
         "ok": true
       },
       "structs-and-capabilities.nova": {
-        "median_ms": 120.49,
-        "min_ms": 119.55,
+        "median_ms": 631.72,
+        "min_ms": 473.82,
         "ok": true
       },
       "structs-basic.nova": {
-        "median_ms": 120.71,
-        "min_ms": 120.19,
+        "median_ms": 618.26,
+        "min_ms": 493.77,
         "ok": true
       },
       "timing.nova": {
-        "median_ms": 120.26,
-        "min_ms": 120.14,
+        "median_ms": 596.01,
+        "min_ms": 500.08,
         "ok": true
       },
       "traits-basics.nova": {
-        "median_ms": 120.88,
-        "min_ms": 120.03,
+        "median_ms": 724.04,
+        "min_ms": 585.36,
         "ok": true
       },
       "tuples.nova": {
-        "median_ms": 122.71,
-        "min_ms": 121.51,
+        "median_ms": 643.28,
+        "min_ms": 550.93,
         "ok": true
       },
       "widen-and-audit.nova": {
-        "median_ms": 120.75,
-        "min_ms": 120.06,
+        "median_ms": 959.99,
+        "min_ms": 659.51,
         "ok": true
       }
     },
     "run": {
       "authority.nova": {
-        "median_ms": 120.34,
-        "min_ms": 120.25,
+        "median_ms": 649.94,
+        "min_ms": 541.77,
         "ok": true
       },
       "campus-platform.nova": {
-        "median_ms": 135.27,
-        "min_ms": 122.53,
+        "median_ms": 545.67,
+        "min_ms": 495.93,
         "ok": false
       },
       "cli-program.nova": {
-        "median_ms": 123.34,
-        "min_ms": 122.66,
+        "median_ms": 553.91,
+        "min_ms": 504.18,
         "ok": false
       },
       "combined-request-handler.nova": {
-        "median_ms": 121.76,
-        "min_ms": 121.43,
+        "median_ms": 967.42,
+        "min_ms": 404.37,
         "ok": false
       },
       "enterprise-platform.nova": {
-        "median_ms": 124.47,
-        "min_ms": 123.47,
+        "median_ms": 585.6,
+        "min_ms": 377.53,
         "ok": true
       },
       "enums-and-pattern-matching.nova": {
-        "median_ms": 121.37,
-        "min_ms": 119.71,
+        "median_ms": 580.57,
+        "min_ms": 567.91,
         "ok": false
       },
       "failure-lifecycle.nova": {
-        "median_ms": 122.25,
-        "min_ms": 121.01,
+        "median_ms": 534.19,
+        "min_ms": 525.73,
         "ok": true
       },
       "filesystem-and-network.nova": {
-        "median_ms": 122.93,
-        "min_ms": 121.32,
+        "median_ms": 838.81,
+        "min_ms": 829.6,
         "ok": true
       },
       "generic-box-and-trait.nova": {
-        "median_ms": 121.4,
-        "min_ms": 121.28,
+        "median_ms": 594.9,
+        "min_ms": 551.63,
         "ok": true
       },
       "generic-collection-list.nova": {
-        "median_ms": 122.07,
-        "min_ms": 120.74,
+        "median_ms": 685.3,
+        "min_ms": 481.42,
         "ok": false
       },
       "generics-basics.nova": {
-        "median_ms": 125.47,
-        "min_ms": 124.18,
+        "median_ms": 676.98,
+        "min_ms": 599.96,
         "ok": false
       },
       "hello.nova": {
-        "median_ms": 119.62,
-        "min_ms": 119.53,
+        "median_ms": 998.15,
+        "min_ms": 676.93,
         "ok": true
       },
       "http-like.nova": {
-        "median_ms": 121.13,
-        "min_ms": 121.03,
+        "median_ms": 1231.18,
+        "min_ms": 1107.94,
         "ok": false
       },
       "mutability-and-loops.nova": {
-        "median_ms": 120.31,
-        "min_ms": 120.17,
+        "median_ms": 606.28,
+        "min_ms": 588.75,
         "ok": false
       },
       "option-basics.nova": {
-        "median_ms": 120.75,
-        "min_ms": 120.63,
+        "median_ms": 471.85,
+        "min_ms": 448.46,
         "ok": false
       },
       "recursive-list-processing.nova": {
-        "median_ms": 121.15,
-        "min_ms": 120.83,
+        "median_ms": 512.92,
+        "min_ms": 483.51,
         "ok": false
       },
       "result-error-handling.nova": {
-        "median_ms": 120.65,
-        "min_ms": 120.03,
+        "median_ms": 684.61,
+        "min_ms": 570.94,
         "ok": false
       },
       "retry.nova": {
-        "median_ms": 121.25,
-        "min_ms": 120.57,
+        "median_ms": 509.0,
+        "min_ms": 485.63,
         "ok": false
       },
       "structs-and-capabilities.nova": {
-        "median_ms": 121.54,
-        "min_ms": 120.88,
+        "median_ms": 574.97,
+        "min_ms": 385.61,
         "ok": true
       },
       "structs-basic.nova": {
-        "median_ms": 120.94,
-        "min_ms": 120.53,
+        "median_ms": 701.4,
+        "min_ms": 529.38,
         "ok": false
       },
       "timing.nova": {
-        "median_ms": 120.96,
-        "min_ms": 120.76,
+        "median_ms": 668.26,
+        "min_ms": 577.38,
         "ok": true
       },
       "traits-basics.nova": {
-        "median_ms": 123.64,
-        "min_ms": 122.97,
+        "median_ms": 972.93,
+        "min_ms": 555.7,
         "ok": true
       },
       "tuples.nova": {
-        "median_ms": 121.98,
-        "min_ms": 121.67,
+        "median_ms": 462.82,
+        "min_ms": 389.55,
         "ok": false
       },
       "widen-and-audit.nova": {
-        "median_ms": 122.4,
-        "min_ms": 121.52,
+        "median_ms": 393.65,
+        "min_ms": 387.82,
         "ok": false
       }
     }
+  },
+  "list_allocations": {
+    "input_size": 100000,
+    "repeats": 3,
+    "operations": {
+      "copy": {
+        "median_total_heap_allocation_bytes": 801568,
+        "median_allocation_count": 15,
+        "median_elapsed_ms": 1.62,
+        "max_peak_traced_heap_bytes": 804144,
+        "samples": [
+          {
+            "operation": "copy",
+            "input_size": 100000,
+            "output_size": 100000,
+            "elapsed_ms": 2.12,
+            "total_heap_allocation_bytes": 803632,
+            "allocation_count": 20,
+            "peak_traced_heap_bytes": 804144,
+            "checksum": 45
+          },
+          {
+            "operation": "copy",
+            "input_size": 100000,
+            "output_size": 100000,
+            "elapsed_ms": 1.51,
+            "total_heap_allocation_bytes": 801568,
+            "allocation_count": 15,
+            "peak_traced_heap_bytes": 802080,
+            "checksum": 45
+          },
+          {
+            "operation": "copy",
+            "input_size": 100000,
+            "output_size": 100000,
+            "elapsed_ms": 1.62,
+            "total_heap_allocation_bytes": 801568,
+            "allocation_count": 15,
+            "peak_traced_heap_bytes": 802080,
+            "checksum": 45
+          }
+        ]
+      },
+      "map": {
+        "median_total_heap_allocation_bytes": 3599160,
+        "median_allocation_count": 99929,
+        "median_elapsed_ms": 56.55,
+        "max_peak_traced_heap_bytes": 3600496,
+        "samples": [
+          {
+            "operation": "map",
+            "input_size": 100000,
+            "output_size": 100000,
+            "elapsed_ms": 56.55,
+            "total_heap_allocation_bytes": 3599984,
+            "allocation_count": 99931,
+            "peak_traced_heap_bytes": 3600496,
+            "checksum": 145
+          },
+          {
+            "operation": "map",
+            "input_size": 100000,
+            "output_size": 100000,
+            "elapsed_ms": 56.6,
+            "total_heap_allocation_bytes": 3599160,
+            "allocation_count": 99929,
+            "peak_traced_heap_bytes": 3599672,
+            "checksum": 145
+          },
+          {
+            "operation": "map",
+            "input_size": 100000,
+            "output_size": 100000,
+            "elapsed_ms": 54.04,
+            "total_heap_allocation_bytes": 3599160,
+            "allocation_count": 99929,
+            "peak_traced_heap_bytes": 3599672,
+            "checksum": 145
+          }
+        ]
+      },
+      "filter_map": {
+        "median_total_heap_allocation_bytes": 1843756,
+        "median_allocation_count": 49972,
+        "median_elapsed_ms": 30.71,
+        "max_peak_traced_heap_bytes": 1845092,
+        "samples": [
+          {
+            "operation": "filter_map",
+            "input_size": 100000,
+            "output_size": 50000,
+            "elapsed_ms": 31.54,
+            "total_heap_allocation_bytes": 1844580,
+            "allocation_count": 49974,
+            "peak_traced_heap_bytes": 1845092,
+            "checksum": 280
+          },
+          {
+            "operation": "filter_map",
+            "input_size": 100000,
+            "output_size": 50000,
+            "elapsed_ms": 29.99,
+            "total_heap_allocation_bytes": 1843756,
+            "allocation_count": 49972,
+            "peak_traced_heap_bytes": 1844268,
+            "checksum": 280
+          },
+          {
+            "operation": "filter_map",
+            "input_size": 100000,
+            "output_size": 50000,
+            "elapsed_ms": 30.71,
+            "total_heap_allocation_bytes": 1843756,
+            "allocation_count": 49972,
+            "peak_traced_heap_bytes": 1844268,
+            "checksum": 280
+          }
+        ]
+      }
+    },
+    "note": "Heap allocation metrics are measured with Python tracemalloc."
   },
   "note": "Wall-clock on this machine. Not a cross-language comparison \u2014 see README.md."
 }
