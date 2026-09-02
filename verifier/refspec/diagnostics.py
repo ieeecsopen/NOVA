@@ -5,6 +5,7 @@ too subtle to keep, so this module is deliberately not an afterthought.
 """
 from __future__ import annotations
 
+import unicodedata
 from dataclasses import dataclass, field
 
 
@@ -19,6 +20,27 @@ class Span:
 
 
 EMPTY_SPAN = Span(0, 0)
+
+# Tabs are rendered as a fixed run of spaces (as rustc does) so the caret
+# line below the source line can be padded with spaces and still line up,
+# whatever tab stop the terminal happens to use.
+TAB_WIDTH = 4
+
+
+def display_width(s: str) -> int:
+    """Terminal columns `s` occupies once tabs are expanded. East Asian
+    wide/fullwidth glyphs take two cells, combining marks take none."""
+    w = 0
+    for ch in s:
+        if ch == "	":
+            w += TAB_WIDTH
+        elif unicodedata.combining(ch):
+            continue
+        elif unicodedata.east_asian_width(ch) in ("W", "F"):
+            w += 2
+        else:
+            w += 1
+    return w
 
 
 @dataclass
@@ -72,13 +94,20 @@ class Source:
         line, col = self.line_col(lab.span.start)
         text = self.line_text(line)
         pad = " " * len(str(line))
-        width = max(1, min(lab.span.end - lab.span.start,
+        chars = max(1, min(lab.span.end - lab.span.start,
                            len(text) - (col - 1)))
-        caret = ("^" if lab.primary else "-") * width
+        # `col` counts characters; the caret has to be positioned in
+        # terminal cells, which differ as soon as the line holds a tab or
+        # a wide glyph. Measure the text before and under the span rather
+        # than assuming one cell per character.
+        lead = " " * display_width(text[:col - 1])
+        caret = ("^" if lab.primary else "-") * max(
+            1, display_width(text[col - 1:col - 1 + chars]))
+        shown = text.replace("\t", " " * TAB_WIDTH)
         return [f"{pad}--> {self.name}:{line}:{col}",
                 f"{pad} |",
-                f"{line} | {text}",
-                f"{pad} | {' ' * (col - 1)}{caret} {lab.message}"]
+                f"{line} | {shown}",
+                f"{pad} | {lead}{caret} {lab.message}"]
 
     def render(self, d: Diagnostic) -> str:
         out = [f"error[{d.code}]: {d.title}"]
