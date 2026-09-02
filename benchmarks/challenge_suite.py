@@ -17,12 +17,15 @@ Usage:  python3 benchmarks/challenge_suite.py [--json]
 """
 from __future__ import annotations
 
+import gc
 import json
 import os
 import statistics
 import subprocess
 import sys
 import time
+import tracemalloc
+from typing import Callable
 import shutil
 
 REPO_ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
@@ -53,7 +56,7 @@ def _nova_cmd(*args: str) -> list[str]:
                 "Running the NOVA benchmark on Windows requires Git Bash or WSL "
                 "because the nova launcher is a shell script."
             )
-        return [bash, NOVA, *args]
+        return [bash, "./nova", *args]
     return [NOVA, *args]
 
 
@@ -108,6 +111,108 @@ def bench_run(files: list[str]) -> dict:
 
     return out
 
+def _allocation_totals(
+    before: tracemalloc.Snapshot,
+    after: tracemalloc.Snapshot,
+) -> tuple[int, int]:
+    """Return positive heap growth bytes and allocation block count."""
+    stats = after.compare_to(before, "lineno")
+
+    allocated_bytes = sum(stat.size_diff for stat in stats if stat.size_diff > 0)
+    allocation_count = sum(stat.count_diff for stat in stats if stat.count_diff > 0)
+
+    return int(allocated_bytes), int(allocation_count)
+
+def _measure_list_allocation(
+    name: str,
+    transform: Callable[[list[int]], list[int]],
+    size: int = LIST_ALLOCATION_SIZE,
+) -> dict:
+    """Measure heap allocations for one large list transformation."""
+    source = list(range(size))
+
+    gc.collect()
+    tracemalloc.start()
+
+    before = tracemalloc.take_snapshot()
+
+    t0 = time.perf_counter()
+    transformed = transform(source)
+    elapsed_ms = (time.perf_counter() - t0) * 1000.0
+
+    after = tracemalloc.take_snapshot()
+    _, peak_bytes = tracemalloc.get_traced_memory()
+
+    tracemalloc.stop()
+
+    allocated_bytes, allocation_count = _allocation_totals(before, after)
+
+    return {
+        "operation": name,
+        "input_size": size,
+        "output_size": len(transformed),
+        "elapsed_ms": round(elapsed_ms, 2),
+        "total_heap_allocation_bytes": allocated_bytes,
+        "allocation_count": allocation_count,
+        "peak_traced_heap_bytes": int(peak_bytes),
+        "checksum": sum(transformed[:10]),
+    }
+
+
+def bench_list_allocations(
+    size: int = LIST_ALLOCATION_SIZE,
+    repeats: int = LIST_ALLOCATION_REPEATS,
+) -> dict:
+    """Benchmark heap allocation behaviour for large list transformations."""
+    operations: dict[str, Callable[[list[int]], list[int]]] = {
+        "copy": lambda values: [value for value in values],
+        "map": lambda values: [(value * 3) + 1 for value in values],
+        "filter_map": lambda values: [
+            (value * 3) + 1
+            for value in values
+            if value % 2 == 0
+        ],
+    }
+
+    results = {}
+
+    for name, transform in operations.items():
+        samples = [
+            _measure_list_allocation(name, transform, size)
+            for _ in range(repeats)
+        ]
+
+        results[name] = {
+            "median_total_heap_allocation_bytes": int(
+                statistics.median(
+                    sample["total_heap_allocation_bytes"]
+                    for sample in samples
+                )
+            ),
+            "median_allocation_count": int(
+                statistics.median(
+                    sample["allocation_count"]
+                    for sample in samples
+                )
+            ),
+            "median_elapsed_ms": round(
+                statistics.median(sample["elapsed_ms"] for sample in samples),
+                2,
+            ),
+            "max_peak_traced_heap_bytes": max(
+                sample["peak_traced_heap_bytes"]
+                for sample in samples
+            ),
+            "samples": samples,
+        }
+
+    return {
+        "input_size": size,
+        "repeats": repeats,
+        "operations": results,
+        "note": "Heap allocation metrics are measured with Python tracemalloc.",
+    }
+
 
 def main(argv: list[str]) -> int:
     as_json = "--json" in argv
@@ -122,6 +227,7 @@ def main(argv: list[str]) -> int:
     check = bench_check(files)
     build = bench_build_cache(hello)
     run = bench_run(files)
+    list_allocations = bench_list_allocations()
 
     check_med = statistics.median(v["median_ms"] for v in check.values())
     run_med = statistics.median(v["median_ms"] for v in run.values())
@@ -132,6 +238,7 @@ def main(argv: list[str]) -> int:
         "build_hello_clean_ms": build["clean"]["median_ms"],
         "build_hello_cached_ms": build["cached"]["median_ms"],
         "per_file": {"check": check, "run": run},
+        "list_allocations": list_allocations,
         "note": ("Wall-clock on this machine. Not a cross-language "
                  "comparison — see README.md."),
     }
@@ -144,6 +251,10 @@ def main(argv: list[str]) -> int:
         print(f"  nova run     median across examples : {run_med:.2f} ms")
         print(f"  nova build hello.nova  (clean)      : {build['clean']['median_ms']:.2f} ms")
         print(f"  nova build hello.nova  (cached)     : {build['cached']['median_ms']:.2f} ms")
+        print()
+        print("List allocation benchmark:")
+        print(f"input size                         : {list_allocations['input_size']}")
+        print(f"repeats                            : {list_allocations['repeats']}")
         print()
         print("  Wall-clock on this machine. Not a cross-language comparison.")
 
