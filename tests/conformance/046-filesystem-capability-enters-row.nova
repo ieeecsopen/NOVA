@@ -1,0 +1,15 @@
+//! expect: error E0201
+// `Filesystem` is a prelude capability (RFC 0001 §4.1). Obtaining it from
+// `Runtime` and using it is an effect: a function that calls
+// `fs.exists(...)` must declare `Filesystem` in its row, exactly as it
+// must declare `Clock` for `clock.now()`. Here the row is understated.
+
+fn touches_disk(rt: Runtime) -> Bool ! {Runtime} {
+    let fs = rt.filesystem();
+    fs.exists("nova.toml")
+}
+
+fn main(rt: Runtime) -> Int ! {Runtime} {
+    let _ = touches_disk(rt);
+    0
+}
