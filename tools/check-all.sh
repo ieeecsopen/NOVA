@@ -46,6 +46,34 @@ rm -f /tmp/nova-run-err
 echo "examples ran"
 
 echo
+echo "== nova build every example (native subset + interpreter fallback) =="
+# Exercises the driver end to end: codegen for the supported subset, and
+# the interpreter-backed runner for everything else. A build that errors
+# out (rather than falling back) is a real failure. This is the check
+# whose absence let the codegen breakage go unnoticed.
+mkdir -p /tmp/nova-build-check
+native=0; interp=0
+for f in $(find examples -name "*.nova" ! -name "rejected*.nova" ! -name "*rejected*"); do
+    out="/tmp/nova-build-check/$(basename "$f" .nova)"
+    if ! msg=$(./nova build "$f" -o "$out" 2>&1); then
+        echo "BUILD ERROR for $f:"; echo "$msg"; exit 1
+    fi
+    case "$msg" in
+        *"native binary"*)        native=$((native + 1)) ;;
+        *"interpreter-backed"*)   interp=$((interp + 1)) ;;
+        *) echo "BUILD produced no backend line for $f:"; echo "$msg"; exit 1 ;;
+    esac
+    # Run the artifact; only a Python traceback is a real failure (see above).
+    if ! "$out" >/dev/null 2>/tmp/nova-artifact-err; then
+        if grep -q "Traceback" /tmp/nova-artifact-err; then
+            echo "ARTIFACT CRASH for $f:"; cat /tmp/nova-artifact-err; exit 1
+        fi
+    fi
+done
+rm -rf /tmp/nova-build-check /tmp/nova-artifact-err
+echo "built and ran every example ($native native, $interp interpreter-backed)"
+
+echo
 echo "== rejected.nova must fail =="
 if "$PYTHON" -m verifier.refspec check examples/module-system/rejected.nova >/dev/null 2>&1; then
     echo "ERROR: rejected.nova unexpectedly checked ok"
