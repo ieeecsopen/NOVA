@@ -1,14 +1,37 @@
-// NOVA Core prelude.
+// NOVA core prelude.
 //
 // These capability declarations are implicitly in scope in every program.
 // They declare *types*, never values: the only way to obtain a `Runtime`
-// is to be `main` (RFC 0001 §4.7).
+// is to be `main` (RFC 0001 §4.7). Every other capability is minted from
+// `Runtime` by an explicit operation, so acquiring authority is always a
+// visible effect in the row.
 
 capability Runtime {
     clock() -> Clock
+    filesystem() -> Filesystem
+    network() -> Network
     print(line: String) -> Unit
 }
 
 capability Clock {
     now() -> Int
+}
+
+// Filesystem authority. `read` returns the file's contents; `write`
+// replaces them and returns the number of bytes written. A program that
+// calls either carries `Filesystem` in its effect row, and a library
+// that wants to touch the disk must be handed this token explicitly
+// (nova.toml `[capabilities] allowed`).
+capability Filesystem {
+    read(path: String) -> String
+    write(path: String, contents: String) -> Int
+    exists(path: String) -> Bool
+}
+
+// Network authority. `get` performs a request to the given URL and
+// returns the response body; `post` sends a body and returns the
+// response. Both put `Network` in the caller's row.
+capability Network {
+    get(url: String) -> String
+    post(url: String, body: String) -> String
 }
