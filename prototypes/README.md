@@ -1,15 +1,13 @@
-# NOVA Experimental Prototypes
+# prototypes
 
-Exploratory algorithmic implementations and executable models validating language mechanics.
+Reserved for exploratory, throwaway implementations that validate a
+language mechanism before it is specified in an RFC.
 
----
+**Status: empty.** Nothing here yet. The one prototype that exists —
+`regionlab/`, the Milestone 1 region/ownership checker — lives at the
+repository root because it has its own test suite wired into CI.
 
-## Prototype Modules
-
-* [**`program-model/`**](program-model/) — Whole-program syntax models and execution graphs.
-* [**`type-system/`**](type-system/) — Type inference, Row unification algorithms, and variance rules.
-* [**`effects/`**](effects/) — Row join algorithms, effect handlers, and dynamic effect traces.
-* [**`capabilities/`**](capabilities/) — Authority token minting, revocation, and capability attenuation wrappers.
-* [**`contracts/`**](contracts/) — Design-by-Contract runtime assertion hooks and condition checks.
-* [**`resources/`**](resources/) — Step counters, memory high-watermark monitors, and token meters.
-* [**`uncertainty/`**](uncertainty/) — Epistemic state containers and decay estimators.
+The subdirectories previously listed here (`type-system/`, `effects/`,
+`capabilities/`, …) were aspirational and have been removed. When a
+prototype is actually built, it gets a directory here with a `run.py`
+and a line in [ROADMAP.md](../ROADMAP.md).
