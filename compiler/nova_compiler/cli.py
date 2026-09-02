@@ -255,8 +255,8 @@ def main(argv: list[str] = None) -> int:
         return 0
 
     elif args.command == "add":
-        add_dependency(args.pkg, version=args.version, capabilities=args.caps)
-        return 0
+        ok = add_dependency(args.pkg, version=args.version, capabilities=args.caps)
+        return 0 if ok else 1
 
     elif args.command == "remove":
         remove_dependency(args.pkg)

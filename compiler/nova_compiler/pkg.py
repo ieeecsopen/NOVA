@@ -12,6 +12,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
 import sys
 import tarfile
 from typing import Optional
@@ -19,6 +20,18 @@ from typing import Optional
 
 MANIFEST_FILE = "nova.toml"
 LOCK_FILE = "nova.lock"
+
+# The pattern semver.org publishes for SemVer 2.0.0: MAJOR.MINOR.PATCH,
+# no leading zeros, optional -prerelease and +build metadata.
+SEMVER_RE = re.compile(
+    r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)"
+    r"(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)"
+    r"(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?"
+    r"(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$")
+
+
+def is_semver(version: str) -> bool:
+    return SEMVER_RE.match(version) is not None
 
 
 def init_new_package(pkg_name: str, parent_dir: str = ".") -> bool:
@@ -104,6 +117,15 @@ allowed = ["Runtime", "Clock", "Filesystem", "Network"]
 
 
 def add_dependency(pkg_name: str, version: str = "1.0.0", capabilities: list[str] = None) -> bool:
+    if not is_semver(version):
+        print(f"error: `{version}` is not a valid version for `{pkg_name}`", file=sys.stderr)
+        print("  = note: versions follow SemVer 2.0.0 -- MAJOR.MINOR.PATCH with an "
+              "optional -prerelease and +build, e.g. 1.4.0 or 2.0.0-beta.1",
+              file=sys.stderr)
+        if version.startswith("v") and is_semver(version[1:]):
+            print(f"  = help: drop the leading `v`: --version {version[1:]}", file=sys.stderr)
+        return False
+
     init_manifest_if_missing()
     caps_str = ", ".join(f'"{c}"' for c in (capabilities or []))
 
