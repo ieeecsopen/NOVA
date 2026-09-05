@@ -4,15 +4,12 @@ Formal research tracks investigating the mathematical and architectural foundati
 
 ---
 
-## Research Tracks
+## Documents
 
-* [**`language-comparisons/`**](language-comparisons/) — Comparative analysis across Rust, Go, Zig, C++, TypeScript, Python, and Swift.
-* [**`type-systems/`**](type-systems/) — Hindley-Milner type inference, row typing, and nominal subtyping.
-* [**`effects/`**](effects/) — Algebraic effect systems, Koka/Eff comparisons, and graded effect rows.
-* [**`capabilities/`**](capabilities/) — Object-capability security, authority attenuation, and zero-ambient access.
-* [**`resources/`**](resources/) — Resource semirings, cost models, and dynamic metering algorithms.
-* [**`uncertainty/`**](uncertainty/) — Epistemic certainty states, conformal prediction, and provenance certificates.
-* [**`concurrency/`**](concurrency/) — Structured concurrency, Chase-Lev work-stealing schedulers, and race-free regions.
-* [**`distributed/`**](distributed/) — Content-addressed computation, saga transactions, and failure models.
-* [**`ai/`**](ai/) — AI as a controlled computational primitive, agent sandboxing, and financial budget envelopes.
-* [**`verification/`**](verification/) — SMT solving (Z3/CVC5), property-based testing, and Lean 4 proof export.
+* [**`RESEARCH.md`**](RESEARCH.md) — Phase 0 literature review across the twenty-one areas in scope: what is already known, so NOVA neither re-discovers nor claims it.
+* [**`PROBLEM-SPACE.md`**](PROBLEM-SPACE.md) — Twenty-four problems in modern programming languages, each with a novelty assessment of whether NOVA should attempt it.
+* [**`COMPETITIVE-ANALYSIS.md`**](COMPETITIVE-ANALYSIS.md) — What Rust, Go, Zig, C++, TypeScript, Python, Swift and related systems actually solved, what NOVA should take, and what it must not repeat.
+* [**`DESIGN-OPPORTUNITIES.md`**](DESIGN-OPPORTUNITIES.md) — Phase 0 synthesis: where the problem space collapses into shared mechanisms, where it does not, and what NOVA's thesis should therefore be.
+* [**`SAFETY-GUARANTEES.md`**](SAFETY-GUARANTEES.md) — Milestone 1. A precise statement of what the ownership model claims, on the Constitution's guarantee ladder, with the `regionlab` test that backs each claim.
+
+The per-topic research on effects, capabilities, resources, uncertainty, concurrency, distribution, AI and verification lives in the corresponding design documents under [`docs/`](../docs/), not in subdirectories here.

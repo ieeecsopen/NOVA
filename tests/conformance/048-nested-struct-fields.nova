@@ -1,0 +1,23 @@
+//! expect: ok
+//! sig: zip_of = (User) -> Int
+//! stdout: Colombo
+//! exit: 30
+// A field access chain is resolved one projection at a time, so
+// `u.profile.address.zip` needs no rule beyond the one `p.x` already
+// uses (RFC 0002 §4.1). Each step is nominal: `profile` is a `Profile`,
+// `address` an `Address`, and only then is `zip` looked up.
+
+struct Address { city: String, zip: Int }
+struct Profile { address: Address, age: Int }
+struct User { profile: Profile, id: Int }
+
+fn zip_of(u: User) -> Int { u.profile.address.zip }
+
+fn main(rt: Runtime) -> Int ! {Runtime} {
+    let u = User {
+        profile: Profile { address: Address { city: "Colombo", zip: 10 }, age: 20 },
+        id: 7,
+    };
+    rt.print(u.profile.address.city);
+    zip_of(u) + u.profile.age
+}

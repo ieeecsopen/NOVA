@@ -93,5 +93,11 @@ echo "== experiments (docs/experiments/) =="
 "$PYTHON" tests/tracing/run.py
 
 echo
+echo "== toolchain (nova fmt / lint / add, diagnostic rendering) =="
+"$PYTHON" tests/toolchain/run.py
+./nova fmt --check examples >/dev/null
+echo "examples are canonically formatted"
+
+echo
 echo "== regionlab (Milestone 1 prototype, docs/regionlab) =="
 "$PYTHON" regionlab/tests/run.py

@@ -5,7 +5,7 @@
 [![CI](https://github.com/ieeecsopen/NOVA/actions/workflows/ci.yml/badge.svg)](https://github.com/ieeecsopen/NOVA/actions/workflows/ci.yml)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Status](https://img.shields.io/badge/Status-0.2_research_preview-f59e0b.svg)](ROADMAP.md)
-[![Conformance](https://img.shields.io/badge/Conformance-47%2F47-0e8a16.svg)](tests/conformance/)
+[![Conformance](https://img.shields.io/badge/Conformance-49%2F49-0e8a16.svg)](tests/conformance/)
 [![RegionLab](https://img.shields.io/badge/RegionLab-14%2F14-0e8a16.svg)](regionlab/)
 
 **A constraint-native programming language — research preview**
@@ -155,7 +155,7 @@ a binary it cannot compile.
 | Package registry, `attenuate`, string ops, WASM Component Model | **Not implemented** |
 | Distributed runtime, WASM UI, AI-agent governance, concurrency runtime | **Design only** — see [ROADMAP.md](ROADMAP.md) |
 
-The 47-test conformance suite (`tests/conformance/`) is the shared
+The 49-test conformance suite (`tests/conformance/`) is the shared
 arbiter for the semantics; it includes explicit attack cases (return a
 capability, stash it in a let-bound closure, hide an effect in one
 `match` arm).
