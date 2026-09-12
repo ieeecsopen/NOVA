@@ -10,7 +10,7 @@
 
 **A constraint-native programming language — research preview**
 
-*Purity by default. Authority as an unforgeable token. Effects in the type.*
+_Purity by default. Authority as an unforgeable token. Effects in the type._
 
 [**Quickstart**](#quickstart) • [**The idea**](#the-idea) • [**What actually works**](#what-actually-works-today) • [**Roadmap**](#roadmap) • [**Contributing**](#contributing)
 
@@ -45,18 +45,18 @@ independent implementations agree. Currently there is one implementation.
 Programs carry real-world obligations that mainstream languages cannot
 express in a signature:
 
-* *This dependency must not touch the network.*
-* *This closure must not smuggle out filesystem authority it captured.*
-* *This function's side effects must be visible to its caller.*
+- _This dependency must not touch the network._
+- _This closure must not smuggle out filesystem authority it captured._
+- _This function's side effects must be visible to its caller._
 
 Today those obligations live in code-review comments, linter configs and
 runtime sandboxes — checked late, by tools that do not understand
 whole-program semantics. NOVA puts them in the type system:
 
-1. **Pure by default.** What a function *does* is part of its signature:
+1. **Pure by default.** What a function _does_ is part of its signature:
    `fn f(rt: Runtime) -> Int ! {Runtime}`.
 2. **Object capabilities.** Authority over the outside world is an
-   unforgeable lexical token you must be *handed*. No `import` confers it.
+   unforgeable lexical token you must be _handed_. No `import` confers it.
 3. **No authority laundering.** A closure that captures a capability
    carries it in its type; it cannot be passed somewhere that expects a
    pure function.
@@ -70,7 +70,7 @@ fn main(rt: Runtime) -> Int ! {Runtime} {
 
 ### The diagnostic that motivates it
 
-Capability-safe languages control who can *obtain* authority but lose
+Capability-safe languages control who can _obtain_ authority but lose
 track of it once it is captured in a closure. Effect-typed languages
 track what happened but allow ambient effects. NOVA rejects authority
 laundering statically:
@@ -148,25 +148,25 @@ not on your `PATH`.
 
 ## What actually works today
 
-| Area | State |
-| :--- | :--- |
-| Lexer, parser, spans, diagnostics | **Working**, `verifier/refspec/` |
-| Hindley–Milner type inference | **Working** |
-| Row-typed effect checking (equality, not subsumption) | **Working** |
-| Capability model + laundering prevention (closures **and** struct fields) | **Working** |
-| Structs, enums, tuples, pattern matching, exhaustiveness | **Working** |
-| Generics, traits, `impl` | **Working** (limits: [known-issues](docs/known-issues.md) P1–P2) |
-| Modules, visibility | **Working** (flat namespace: [known-issues](docs/known-issues.md) P3) |
-| Local mutability, `while`, `for` over `List` | **Working** |
-| Prelude capabilities: `Runtime`, `Clock`, `Filesystem`, `Network` | **Working** in the interpreter |
-| Reference interpreter | **Working**, authoritative |
-| Native C backend | **First-order subset only** ([known-issues](docs/known-issues.md) C1) |
-| Language server (`nova lsp`) | **Minimal** — diagnostics, completion, formatting |
-| VS Code extension | **Working** — [editors/vscode/](editors/vscode/), builds to a `.vsix` |
-| `regionlab` region/ownership checker | **Prototype**, separate, [regionlab/](regionlab/) |
-| HIR / MIR | **Informational scaffolding** ([known-issues](docs/known-issues.md) C2) |
-| Package registry, `attenuate`, string ops, WASM Component Model | **Not implemented** |
-| Distributed runtime, WASM UI, AI-agent governance, concurrency runtime | **Design only** — see [ROADMAP.md](ROADMAP.md) |
+| Area                                                                      | State                                                                   |
+| :------------------------------------------------------------------------ | :---------------------------------------------------------------------- |
+| Lexer, parser, spans, diagnostics                                         | **Working**, `verifier/refspec/`                                        |
+| Hindley–Milner type inference                                             | **Working**                                                             |
+| Row-typed effect checking (equality, not subsumption)                     | **Working**                                                             |
+| Capability model + laundering prevention (closures **and** struct fields) | **Working**                                                             |
+| Structs, enums, tuples, pattern matching, exhaustiveness                  | **Working**                                                             |
+| Generics, traits, `impl`                                                  | **Working** (limits: [known-issues](docs/known-issues.md) P1–P2)        |
+| Modules, visibility                                                       | **Working** (flat namespace: [known-issues](docs/known-issues.md) P3)   |
+| Local mutability, `while`, `for` over `List`                              | **Working**                                                             |
+| Prelude capabilities: `Runtime`, `Clock`, `Filesystem`, `Network`         | **Working** in the interpreter                                          |
+| Reference interpreter                                                     | **Working**, authoritative                                              |
+| Native C backend                                                          | **First-order subset only** ([known-issues](docs/known-issues.md) C1)   |
+| Language server (`nova lsp`)                                              | **Minimal** — diagnostics, completion, formatting                       |
+| VS Code extension                                                         | **Working** — [editors/vscode/](editors/vscode/), builds to a `.vsix`   |
+| `regionlab` region/ownership checker                                      | **Prototype**, separate, [regionlab/](regionlab/)                       |
+| HIR / MIR                                                                 | **Informational scaffolding** ([known-issues](docs/known-issues.md) C2) |
+| Package registry, `attenuate`, string ops, WASM Component Model           | **Not implemented**                                                     |
+| Distributed runtime, WASM UI, AI-agent governance, concurrency runtime    | **Design only** — see [ROADMAP.md](ROADMAP.md)                          |
 
 The 50-test conformance suite (`tests/conformance/`) is the shared
 arbiter for the semantics; it includes explicit attack cases (return a
@@ -220,12 +220,12 @@ against Rust / Go / C++ was removed. See
 NOVA is at **Milestone 0 → 1** on a milestone ladder with no dates
 ([ROADMAP.md](ROADMAP.md)). In brief:
 
-- **M0 Foundation** *(current)* — freeze the frontend semantics; resolve
+- **M0 Foundation** _(current)_ — freeze the frontend semantics; resolve
   the open effect-derivation questions (known-issues S1, S2).
 - **M1 Memory discipline** — integrate `regionlab` into the checker.
 - **M2 Abstraction** — package manager, `attenuate`, qualified imports.
 - **M3 Compilation** — a real IR and a full native backend; WASM.
-- **M4+ Concurrency, resources, contracts** — built *on* the memory
+- **M4+ Concurrency, resources, contracts** — built _on_ the memory
   model, not bolted beside it.
 
 The "platform" documents under `docs/full-stack/`, `docs/distributed/`
@@ -239,7 +239,7 @@ thinking is load-bearing, not because the code exists.
 | Category | Documents |
 | :--- | :--- |
 | **Foundation** | [Constitution](docs/foundation/LANGUAGE-CONSTITUTION.md) • [Philosophy](docs/foundation/LANGUAGE-PHILOSOPHY.md) • [Program Model](docs/foundation/PROGRAM-MODEL.md) • [Non-Goals](docs/foundation/NON-GOALS.md) • [Decision Log](docs/foundation/DECISION-LOG.md) • [Authority Map](docs/foundation/AUTHORITY-MAP.md) • [Epic implementation status](docs/foundation/EPIC-IMPLEMENTATION-STATUS.md) |
-| **Language** | [Syntax & Grammar](docs/language/SYNTAX.md) • [Type System](docs/language/TYPE-SYSTEM.md) • [Effect System](docs/language/EFFECT-SYSTEM.md) • [Capabilities](docs/language/CAPABILITY-MODEL.md) • [Memory Model](docs/language/MEMORY-MODEL.md) |
+| **Language** | [Syntax & Grammar](docs/language/SYNTAX.md) • [Syntax Cheatsheet](docs/language/SYNTAX-CHEATSHEET.md) • [Type System](docs/language/TYPE-SYSTEM.md) • [Effect System](docs/language/EFFECT-SYSTEM.md) • [Capabilities](docs/language/CAPABILITY-MODEL.md) • [Memory Model](docs/language/MEMORY-MODEL.md) |
 | **RFCs** | [0001 core](RFC/0001-core-capability-effects.md) • [0002 data types](RFC/0002-structs-tuples-enums-pattern-matching.md) • [0003 generics/traits](RFC/0003-generics-and-traits.md) • [0004 modules](RFC/0004-modules-and-imports.md) • [0005 mutability](RFC/0005-local-mutability-and-loops.md) • [0006 ownership/borrowing](RFC/0006-ownership-borrowing-refinement.md) |
 | **Honesty** | [Known issues](docs/known-issues.md) • [Roadmap](ROADMAP.md) |
 | **Deferred agenda (design only)** | [Runtime](docs/runtime/) • [Full-stack](docs/full-stack/) • [Distributed](docs/distributed/) • [AI governance](docs/ai/) • [Platform](docs/platform/) |
