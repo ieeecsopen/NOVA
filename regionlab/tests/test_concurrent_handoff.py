@@ -3,8 +3,8 @@ from __future__ import annotations
 
 import threading
 
-from regionlab.runtime import (RegionAccessError, RegionFrame, RegionRuntime,
-                               WorkStealingScheduler)
+from regionlab.runtime import (ChaseLevDeque, RegionAccessError, RegionFrame,
+                               RegionRuntime, TaskScheduler, WorkStealingScheduler)
 
 
 def test_stolen_frame_revokes_donor_before_thief_can_write() -> None:
@@ -136,7 +136,33 @@ def test_preemption_races_with_writes() -> None:
     assert writes > 0
 
 
+def test_chase_lev_deque_work_stealing_round_trip() -> None:
+    deque = ChaseLevDeque[int]()
+    deque.push_bottom(1)
+    deque.push_bottom(2)
+    assert deque.pop_bottom() == 2
+    assert deque.steal_top() == 1
+    assert deque.is_empty()
+
+
+def test_task_scheduler_steals_work_from_other_worker() -> None:
+    scheduler = TaskScheduler(worker_count=2)
+    seen: list[int] = []
+    scheduler.start()
+    scheduler.spawn(lambda: seen.append(1), worker_index=0)
+    scheduler.spawn(lambda: seen.append(2), worker_index=1)
+    for _ in range(200):
+        if len(seen) >= 2:
+            break
+        import time
+        time.sleep(0.01)
+    scheduler.shutdown(timeout=0.5)
+    assert len(seen) >= 2, seen
+
+
 def run() -> None:
     test_stolen_frame_revokes_donor_before_thief_can_write()
     test_repeated_concurrent_steals_preserve_xor()
     test_preemption_races_with_writes()
+    test_chase_lev_deque_work_stealing_round_trip()
+    test_task_scheduler_steals_work_from_other_worker()

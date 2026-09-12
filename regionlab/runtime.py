@@ -13,9 +13,10 @@ work-stealing runtime must implement.
 """
 from __future__ import annotations
 
+import time
 from dataclasses import dataclass, field
-from threading import RLock
-from typing import Callable, TypeVar
+from threading import RLock, Thread
+from typing import Callable, Generic, TypeVar
 
 
 class RegionAccessError(RuntimeError):
@@ -130,6 +131,67 @@ class RegionRuntime:
 T = TypeVar("T")
 
 
+class ChaseLevDeque(Generic[T]):
+    """Prototype Chase-Lev work-stealing deque.
+
+    The deque is intentionally simple: it uses a lock for the prototype, but it
+    preserves the same bottom-push / top-steal geometry that a full runtime
+    would use when work is stolen across worker threads.
+    """
+
+    def __init__(self, initial_capacity: int = 64) -> None:
+        self._array: list[T | None] = [None] * max(2, initial_capacity)
+        self._top = 0
+        self._bottom = 0
+        self._lock = RLock()
+
+    def push_bottom(self, value: T) -> None:
+        with self._lock:
+            b = self._bottom
+            t = self._top
+            if b - t >= len(self._array) - 1:
+                self._resize()
+            self._array[b % len(self._array)] = value
+            self._bottom = b + 1
+
+    def pop_bottom(self) -> T | None:
+        with self._lock:
+            b = self._bottom - 1
+            self._bottom = b
+            t = self._top
+            if b < t:
+                self._bottom = t
+                return None
+            value = self._array[b % len(self._array)]
+            self._array[b % len(self._array)] = None
+            return value
+
+    def steal_top(self) -> T | None:
+        with self._lock:
+            t = self._top
+            b = self._bottom
+            if t >= b:
+                return None
+            value = self._array[t % len(self._array)]
+            self._array[t % len(self._array)] = None
+            self._top = t + 1
+            return value
+
+    def is_empty(self) -> bool:
+        with self._lock:
+            return self._top >= self._bottom
+
+    def _resize(self) -> None:
+        old = self._array
+        new_cap = len(old) * 2
+        new_arr: list[T | None] = [None] * new_cap
+        for i in range(self._bottom - self._top):
+            new_arr[i] = old[(self._top + i) % len(old)]
+        self._array = new_arr
+        self._top = 0
+        self._bottom = self._bottom - self._top
+
+
 @dataclass
 class RegionFrame:
     """A suspended task frame carrying one exclusive region lease."""
@@ -165,3 +227,68 @@ class WorkStealingScheduler:
                     raise RegionAccessError("frame is not owned by donor")
                 self.regions.handoff_exclusive(frame.lease, donor, thief)
                 frame.task = thief
+
+
+@dataclass
+class Task:
+    """A scheduled unit of work for the prototype runtime."""
+    id: int
+    fn: Callable[[], object]
+
+
+class TaskScheduler:
+    """Prototype M:N scheduler with local-deque execution and work stealing."""
+
+    def __init__(self, worker_count: int = 4) -> None:
+        self.worker_count = max(1, worker_count)
+        self.queues = [ChaseLevDeque[Task]() for _ in range(self.worker_count)]
+        self._next_id = 0
+        self._lock = RLock()
+        self._shutdown = False
+        self._threads: list[Thread] = []
+
+    def spawn(self, fn: Callable[[], object], worker_index: int | None = None) -> Task:
+        with self._lock:
+            if self._shutdown:
+                raise RuntimeError("scheduler is shut down")
+            task = Task(self._next_id, fn)
+            self._next_id += 1
+            idx = worker_index if worker_index is not None else 0
+            idx = max(0, min(idx, self.worker_count - 1))
+            self.queues[idx].push_bottom(task)
+            return task
+
+    def start(self) -> None:
+        if self._threads:
+            return
+        for i in range(self.worker_count):
+            thread = Thread(target=self._worker_loop, args=(i,), daemon=True)
+            thread.start()
+            self._threads.append(thread)
+
+    def shutdown(self, timeout: float = 1.0) -> None:
+        self._shutdown = True
+        for thread in self._threads:
+            thread.join(timeout=timeout)
+
+    def _worker_loop(self, worker_index: int) -> None:
+        while not self._shutdown:
+            task = self._pop_local(worker_index)
+            if task is None:
+                task = self._steal_from_other_workers(worker_index)
+            if task is None:
+                time.sleep(0.0005)
+                continue
+            task.fn()
+
+    def _pop_local(self, worker_index: int) -> Task | None:
+        return self.queues[worker_index].pop_bottom()
+
+    def _steal_from_other_workers(self, worker_index: int) -> Task | None:
+        for i in range(self.worker_count):
+            if i == worker_index:
+                continue
+            task = self.queues[i].steal_top()
+            if task is not None:
+                return task
+        return None
