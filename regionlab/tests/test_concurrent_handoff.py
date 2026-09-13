@@ -145,6 +145,19 @@ def test_chase_lev_deque_work_stealing_round_trip() -> None:
     assert deque.is_empty()
 
 
+def test_chase_lev_deque_resizes_cleanly_after_steal() -> None:
+    deque = ChaseLevDeque[int](initial_capacity=4)
+    deque.push_bottom(1)
+    deque.push_bottom(2)
+    assert deque.steal_top() == 1
+    deque.push_bottom(3)
+    deque.push_bottom(4)
+    deque.push_bottom(5)
+    popped = [deque.pop_bottom() for _ in range(4)]
+    assert popped == [5, 4, 3, 2], f"unexpected pop sequence: {popped}"
+    assert deque.is_empty()
+
+
 def test_task_scheduler_steals_work_from_other_worker() -> None:
     scheduler = TaskScheduler(worker_count=2)
     seen: list[int] = []
@@ -165,4 +178,5 @@ def run() -> None:
     test_repeated_concurrent_steals_preserve_xor()
     test_preemption_races_with_writes()
     test_chase_lev_deque_work_stealing_round_trip()
+    test_chase_lev_deque_resizes_cleanly_after_steal()
     test_task_scheduler_steals_work_from_other_worker()

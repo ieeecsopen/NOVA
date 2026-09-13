@@ -151,6 +151,7 @@ class ChaseLevDeque(Generic[T]):
             t = self._top
             if b - t >= len(self._array) - 1:
                 self._resize()
+                b = self._bottom
             self._array[b % len(self._array)] = value
             self._bottom = b + 1
 
@@ -185,11 +186,12 @@ class ChaseLevDeque(Generic[T]):
         old = self._array
         new_cap = len(old) * 2
         new_arr: list[T | None] = [None] * new_cap
-        for i in range(self._bottom - self._top):
+        size = self._bottom - self._top
+        for i in range(size):
             new_arr[i] = old[(self._top + i) % len(old)]
         self._array = new_arr
         self._top = 0
-        self._bottom = self._bottom - self._top
+        self._bottom = size
 
 
 @dataclass
