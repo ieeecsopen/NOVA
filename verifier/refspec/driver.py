@@ -101,17 +101,39 @@ def compile_source(text: str, name: str = "<input>",
     sm = SourceMap()
     modules: list[a.Module] = []
     try:
+        seen = {"main"}
         if with_prelude:
             with open(PRELUDE_PATH, "r", encoding="utf-8") as fh:
                 prelude_text = fh.read()
-            modules.append(parse_module(
+            prelude_mod = parse_module(
                 prelude_text, sm.add(prelude_text, "std/prelude.nova"),
-                "std.prelude"))
+                "std.prelude")
+            modules.append(prelude_mod)
+            seen.add("std.prelude")
+            prelude_queue = [(d.path, d.path_span) for d in prelude_mod.decls
+                             if isinstance(d, a.ImportDecl)]
+            while prelude_queue:
+                path, span = prelude_queue.pop(0)
+                dotted = ".".join(path)
+                if dotted in seen:
+                    continue
+                seen.add(dotted)
+                file_path = _find_module_file(path, roots)
+                if file_path is None:
+                    raise Diagnostic(
+                        "E0125", f"cannot find module `{dotted}`",
+                        [Label(span, "no matching file")],
+                        notes=[f"looked under: {', '.join(roots)}"])
+                with open(file_path, "r", encoding="utf-8") as fh:
+                    mod_text = fh.read()
+                mod = parse_module(mod_text, sm.add(mod_text, file_path), dotted)
+                modules.append(mod)
+                prelude_queue += [(d.path, d.path_span) for d in mod.decls
+                                  if isinstance(d, a.ImportDecl)]
 
         main_mod = parse_module(text, sm.add(text, name), "main")
         modules.append(main_mod)
 
-        seen = {"main", "std.prelude"}
         queue: list[tuple[list[str], Span]] = [
             (d.path, d.path_span) for d in main_mod.decls
             if isinstance(d, a.ImportDecl)]

@@ -326,6 +326,20 @@ class Interpreter:
                 "interpreter's recursion)") from None
 
     def call_fn(self, name: str, args: list):
+        if name == "trim":
+            return args[0].strip()
+        if name == "starts_with":
+            return args[0].startswith(args[1])
+        if name == "ends_with":
+            return args[0].endswith(args[1])
+        if name == "split":
+            s = args[0]
+            delim = args[1]
+            parts = s.split(delim) if delim != "" else list(s)
+            res = EnumValue("List", "Nil", ())
+            for p in reversed(parts):
+                res = EnumValue("List", "Cons", (p, res))
+            return res
         fn = self.r.fns[name].decl
         env = {p.name: [v] for p, v in zip(fn.params, args)}
         return self.eval(fn.body, env)

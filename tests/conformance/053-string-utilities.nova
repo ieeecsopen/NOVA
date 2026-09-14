@@ -1,0 +1,53 @@
+//! expect: ok
+//! stdout: hello world
+//! stdout: starts: true
+//! stdout: ends: true
+//! stdout: apple
+//! stdout: banana
+//! stdout: cherry
+//! exit: 0
+// Pure string manipulation utilities from std.prelude:
+// trim, starts_with, ends_with, split.
+
+import std.list;
+
+fn pure_checker(s: String) -> Bool ! {} {
+    let t = trim(s);
+    let sw = starts_with(t, "h");
+    let ew = ends_with(t, "d");
+    let parts = split(t, " ");
+    sw && ew
+}
+
+fn main(rt: Runtime) -> Int ! {Runtime} {
+    let raw = "   hello world   ";
+    let cleaned = trim(raw);
+    rt.print(cleaned);
+
+    let sw = starts_with(cleaned, "hello");
+    if sw {
+        rt.print("starts: true");
+    } else {
+        rt.print("starts: false");
+    }
+
+    let ew = ends_with(cleaned, "world");
+    if ew {
+        rt.print("ends: true");
+    } else {
+        rt.print("ends: false");
+    }
+
+    let fruits = split("apple,banana,cherry", ",");
+    for f in fruits {
+        rt.print(f);
+    }
+
+    let check = pure_checker(raw);
+    if check {
+        0
+    } else {
+        1
+    }
+}
+

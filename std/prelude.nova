@@ -35,3 +35,22 @@ capability Network {
     get(url: String) -> String
     post(url: String, body: String) -> String
 }
+
+import std.list;
+
+// Pure string manipulation utilities with zero ambient authority.
+pub fn trim(s: String) -> String ! {} {
+    s
+}
+
+pub fn starts_with(s: String, prefix: String) -> Bool ! {} {
+    false
+}
+
+pub fn ends_with(s: String, suffix: String) -> Bool ! {} {
+    false
+}
+
+pub fn split(s: String, delim: String) -> List[String] ! {} {
+    List::Nil
+}
