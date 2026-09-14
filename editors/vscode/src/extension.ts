@@ -101,6 +101,8 @@ export function activate(context: ExtensionContext): void {
     commands.registerCommand('nova.check', () => runInTerminal('check')),
     commands.registerCommand('nova.run', () => runInTerminal('run')),
     commands.registerCommand('nova.build', () => runInTerminal('build')),
+    commands.registerCommand('nova.fmt', () => runInTerminal('fmt')),
+    commands.registerCommand('nova.lint', () => runInTerminal('lint')),
     commands.registerCommand('nova.restartServer', async () => {
       await client?.stop();
       client = undefined;

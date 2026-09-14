@@ -64,6 +64,16 @@
         "category": "NOVA"
       },
       {
+        "command": "nova.fmt",
+        "title": "NOVA: Format current file",
+        "category": "NOVA"
+      },
+      {
+        "command": "nova.lint",
+        "title": "NOVA: Lint current file",
+        "category": "NOVA"
+      },
+      {
         "command": "nova.restartServer",
         "title": "NOVA: Restart language server",
         "category": "NOVA"
@@ -114,7 +124,18 @@
           "type": "boolean",
           "default": true,
           "description": "Run `nova lsp` for live diagnostics and completion. Disable to use syntax highlighting only."
+        },
+        "nova.formatOnSave": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically format NOVA files on save using the language server."
         }
+      }
+    },
+    "configurationDefaults": {
+      "[nova]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "ieeecsopen.nova-lang"
       }
     }
   },
