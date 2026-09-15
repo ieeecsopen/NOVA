@@ -194,6 +194,34 @@ class Grader:
             # sum here is fine — it is never trusted as the final answer.
             return row
 
+        if isinstance(e, a.EnumCtor):
+            row: GradedRow = {}
+            for x in e.args:
+                row = add(row, self._grade(x))
+            return row
+
+        if isinstance(e, a.StructLit):
+            row: GradedRow = {}
+            for _, x in e.fields:
+                row = add(row, self._grade(x))
+            return row
+
+        if isinstance(e, a.TupleLit):
+            row: GradedRow = {}
+            for x in e.elems:
+                row = add(row, self._grade(x))
+            return row
+
+        if isinstance(e, a.FieldAccess):
+            return self._grade(e.recv)
+
+        if isinstance(e, a.Match):
+            row = self._grade(e.scrutinee)
+            arms_row: GradedRow = {}
+            for arm in e.arms:
+                arms_row = join(arms_row, self._grade(arm.body))
+            return add(row, arms_row)
+
         raise AssertionError(f"unhandled node in grading: {type(e).__name__}")
 
     def _receiver_capability(self, e: a.CapUse) -> str | None:

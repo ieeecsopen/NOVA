@@ -31,6 +31,45 @@ CAPABILITIES = ["Runtime", "Clock", "Filesystem", "Network"]
 
 STDLIB_TYPES = ["Int", "Bool", "String", "Unit", "Option", "Result", "List"]
 
+# Semantic hover information for keywords, capabilities, and types.
+HOVER_INFO: dict[str, str] = {
+    # Keywords
+    "fn": "**`fn`** — Declare a function.\n\n```nova\nfn name(params) -> ReturnType ! {Effects} { body }\n```",
+    "let": "**`let`** — Bind a value (immutable by default).\n\n```nova\nlet x = 42;\nlet mut y = 0;  // mutable binding\n```",
+    "mut": "**`mut`** — Mark a binding or parameter as mutable.",
+    "if": "**`if`** — Conditional expression.\n\n```nova\nif condition { then_branch } else { else_branch }\n```",
+    "else": "**`else`** — Alternative branch of an `if` expression.",
+    "while": "**`while`** — Loop while a condition is true.\n\n```nova\nwhile condition { body }\n```",
+    "for": "**`for`** — Iterate over a collection.\n\n```nova\nfor item in collection { body }\n```",
+    "in": "**`in`** — Used with `for` loops to specify the collection to iterate.",
+    "match": "**`match`** — Pattern matching expression.\n\n```nova\nmatch value {\n    Pattern1 => expr1,\n    Pattern2 => expr2,\n}\n```",
+    "struct": "**`struct`** — Define a product type (record).\n\n```nova\nstruct Point { x: Int, y: Int }\n```",
+    "enum": "**`enum`** — Define a sum type (tagged union).\n\n```nova\nenum Option[T] { Some(T), None }\n```",
+    "trait": "**`trait`** — Define a trait (interface).",
+    "impl": "**`impl`** — Implement a trait for a type.",
+    "import": "**`import`** — Import a module.\n\n```nova\nimport std.list;\n```",
+    "capability": "**`capability`** — Declare a capability type.\n\nCapabilities represent authority to perform effects (I/O, time, etc.).",
+    "pub": "**`pub`** — Mark an item as publicly visible outside its module.",
+    "self": "**`self`** — Reference to the current instance in trait implementations.",
+    "widen": "**`widen`** — Explicitly widen an effect row to include additional capabilities.",
+    "intent": "**`intent`** — Declare the behavioral intent (contract) of a function.",
+    "requires": "**`requires`** — Specify a precondition that must hold at function entry.",
+    "ensures": "**`ensures`** — Specify a postcondition that must hold at function exit.",
+    # Capabilities
+    "Runtime": "**`Runtime`** — Root capability.\n\nProvides access to all system capabilities. Passed to `main()` as the single ambient authority.",
+    "Clock": "**`Clock`** — Time capability.\n\nGrants the ability to read the current time. Effect: `! {Clock}`.",
+    "Filesystem": "**`Filesystem`** — File I/O capability.\n\nGrants read/write access to the filesystem. Effect: `! {Filesystem}`.",
+    "Network": "**`Network`** — Network capability.\n\nGrants the ability to make network requests. Effect: `! {Network}`.",
+    # Core types
+    "Int": "**`Int`** — Signed integer type (arbitrary precision).",
+    "Bool": "**`Bool`** — Boolean type (`true` or `false`).",
+    "String": "**`String`** — UTF-8 string type.",
+    "Unit": "**`Unit`** — The unit type, equivalent to `()`. Used for functions with no meaningful return value.",
+    "Option": "**`Option[T]`** — Optional value.\n\n```nova\nenum Option[T] { Some(T), None }\n```",
+    "Result": "**`Result[T, E]`** — Result of an operation that may fail.\n\n```nova\nenum Result[T, E] { Ok(T), Err(E) }\n```",
+    "List": "**`List[T]`** — Singly-linked list.\n\n```nova\nenum List[T] { Cons(T, List[T]), Nil }\n```",
+}
+
 
 class NovaLSPServer:
     def __init__(self) -> None:
@@ -73,6 +112,7 @@ class NovaLSPServer:
                         "textDocumentSync": 1,  # Full sync
                         "completionProvider": {"triggerCharacters": [".", ":", " "]},
                         "documentFormattingProvider": True,
+                        "hoverProvider": True,
                     }
                 }
             })
@@ -125,8 +165,53 @@ class NovaLSPServer:
                 }]
             })
 
+        elif method == "textDocument/hover":
+            doc = params["textDocument"]
+            uri = doc["uri"]
+            pos = params["position"]
+            text = self.documents.get(uri, "")
+            lines = text.splitlines()
+            line_idx = pos["line"]
+            char_idx = pos["character"]
+            word = self._word_at(lines, line_idx, char_idx)
+            hover_text = HOVER_INFO.get(word) if word else None
+            if hover_text:
+                self.send_response({
+                    "jsonrpc": "2.0",
+                    "id": msg_id,
+                    "result": {
+                        "contents": {"kind": "markdown", "value": hover_text}
+                    }
+                })
+            else:
+                self.send_response({
+                    "jsonrpc": "2.0",
+                    "id": msg_id,
+                    "result": None
+                })
+
         elif method == "shutdown":
             self.send_response({"jsonrpc": "2.0", "id": msg_id, "result": None})
+
+    @staticmethod
+    def _word_at(lines: list[str], line: int, char: int) -> str | None:
+        """Extract the word (identifier) at the given (line, char) position."""
+        if line < 0 or line >= len(lines):
+            return None
+        text = lines[line]
+        if char < 0 or char >= len(text):
+            return None
+        if not (text[char].isalnum() or text[char] == '_'):
+            return None
+        # Walk left
+        start = char
+        while start > 0 and (text[start - 1].isalnum() or text[start - 1] == '_'):
+            start -= 1
+        # Walk right
+        end = char
+        while end < len(text) - 1 and (text[end + 1].isalnum() or text[end + 1] == '_'):
+            end += 1
+        return text[start:end + 1]
 
     def publish_diagnostics(self, uri: str, text: str) -> None:
         # Publish diagnostics back to client
