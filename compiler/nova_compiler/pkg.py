@@ -186,6 +186,45 @@ def update_dependencies() -> bool:
     return True
 
 
+def verify_lockfile(lock_path: str = LOCK_FILE, package_root: str = ".") -> bool:
+    """Verify SHA-256 digests recorded for packages in a lockfile.
+
+    Package entries use ``source`` (relative to ``package_root``) and
+    ``sha256`` fields. An empty package map remains valid for projects with
+    no external dependencies.
+    """
+    try:
+        with open(lock_path, "r", encoding="utf-8") as f:
+            lock_data = json.load(f)
+    except (OSError, json.JSONDecodeError) as exc:
+        raise ValueError(f"invalid lockfile: {exc}") from exc
+
+    packages = lock_data.get("packages")
+    if not isinstance(packages, dict):
+        raise ValueError("invalid lockfile: `packages` must be an object")
+
+    for name, package in packages.items():
+        if not isinstance(package, dict):
+            raise ValueError(f"invalid lockfile entry for `{name}`")
+        source = package.get("source")
+        expected = package.get("sha256")
+        if not isinstance(source, str) or not isinstance(expected, str):
+            raise ValueError(f"invalid digest entry for `{name}`")
+        if not re.fullmatch(r"[0-9a-f]{64}", expected):
+            raise ValueError(f"invalid SHA-256 digest for `{name}`")
+
+        archive_path = os.path.join(package_root, source)
+        try:
+            with open(archive_path, "rb") as archive:
+                actual = hashlib.sha256(archive.read()).hexdigest()
+        except OSError as exc:
+            raise ValueError(f"cannot read package `{name}`: {exc}") from exc
+        if actual != expected:
+            raise ValueError(f"SHA-256 mismatch for `{name}`")
+
+    return True
+
+
 def publish_package(output_dir: str = "dist/") -> bool:
     init_manifest_if_missing()
     os.makedirs(output_dir, exist_ok=True)
