@@ -80,6 +80,9 @@ def main() -> int:
                for f in frames)
     comp = any(f.get("id") == 2 and isinstance(f.get("result"), list)
                and len(f["result"]) > 0 for f in frames)
+    completion_items = next((f["result"] for f in frames if f.get("id") == 2 and isinstance(f.get("result"), list)), [])
+    option_entries = [item for item in completion_items if item.get("label") == "Option"]
+    rich_meta = bool(option_entries and option_entries[0].get("detail") and option_entries[0].get("documentation"))
     diag = any(f.get("method") == "textDocument/publishDiagnostics"
                and f.get("params", {}).get("diagnostics")
                for f in frames)
@@ -87,11 +90,12 @@ def main() -> int:
     print(f"frames received:            {len(frames)}")
     print(f"initialize response:        {'OK' if init else 'MISSING'}")
     print(f"completion response:        {'OK' if comp else 'MISSING'}")
+    print(f"rich completion metadata:    {'OK' if rich_meta else 'MISSING'}")
     print(f"diagnostics for bad program:{'OK' if diag else 'MISSING'}")
     if not stdout:
         print("stderr:", stderr.decode(errors="replace")[:500])
 
-    ok = init and comp and diag
+    ok = init and comp and rich_meta and diag
     print("\nPASS" if ok else "\nFAIL")
     return 0 if ok else 1
 

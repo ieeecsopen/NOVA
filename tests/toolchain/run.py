@@ -11,6 +11,7 @@ from __future__ import annotations
 import contextlib
 import io
 import os
+import subprocess
 import sys
 import tempfile
 import traceback
@@ -277,6 +278,21 @@ def test_wasi_build_fails_closed_instead_of_emitting_host_runner():
         assert metrics is None
         assert "refusing to emit an interpreter-backed artifact" in message
         assert not os.path.exists(output), "WASI build emitted a host runner"
+
+
+def test_cli_help_includes_example_usage():
+    result = subprocess.run(
+        [sys.executable, "-m", "compiler.nova_compiler.cli", "--help"],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    help_text = result.stdout + result.stderr
+    assert "nova dev examples/hello.nova" in help_text, help_text
+    assert "nova build examples/hello.nova --target wasm -o app.wasm" in help_text, help_text
+    assert "nova check examples/hello.nova --emit-hir" in help_text, help_text
 
 
 def main() -> int:

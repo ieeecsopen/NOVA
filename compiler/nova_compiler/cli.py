@@ -43,6 +43,13 @@ def main(argv: list[str] = None) -> int:
     parser = argparse.ArgumentParser(
         prog="nova",
         description="NOVA Developer Toolchain & Native Compiler",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=(
+            "Examples:\n"
+            "  nova dev examples/hello.nova\n"
+            "  nova build examples/hello.nova --target wasm -o app.wasm\n"
+            "  nova check examples/hello.nova --emit-hir\n"
+        ),
     )
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
@@ -51,13 +58,19 @@ def main(argv: list[str] = None) -> int:
     new_p.add_argument("name", help="Name of project to create")
 
     # nova check
-    check_p = subparsers.add_parser("check", help="Type-check and verify effect rows without code generation")
+    check_p = subparsers.add_parser(
+        "check",
+        help="Type-check and inspect IR output (e.g. nova check examples/hello.nova --emit-hir)",
+    )
     check_p.add_argument("file", nargs="?", default="src/main.nova", help="Path to .nova source file (default: src/main.nova)")
     check_p.add_argument("--emit-hir", action="store_true", help="Print High-Level IR (HIR)")
     check_p.add_argument("--emit-mir", action="store_true", help="Print Mid-Level IR (MIR)")
 
     # nova build
-    build_p = subparsers.add_parser("build", help="Compile NOVA source into an optimized machine binary or WASM")
+    build_p = subparsers.add_parser(
+        "build",
+        help="Compile a NOVA program to native or wasm output (e.g. nova build examples/hello.nova --target wasm -o app.wasm)",
+    )
     build_p.add_argument("file", nargs="?", default="src/main.nova", help="Path to .nova source file (default: src/main.nova)")
     build_p.add_argument("-o", "--output", help="Output executable binary path")
     build_p.add_argument("--target", default="native", choices=["native", "wasm", "wasi"], help="Compilation target. `wasm`/`wasi` are not implemented yet (Milestone 3) and fall back to the interpreter-backed runner.")
@@ -71,7 +84,10 @@ def main(argv: list[str] = None) -> int:
     run_p.add_argument("args", nargs=argparse.REMAINDER, help="Arguments passed to the executable")
 
     # nova dev
-    dev_p = subparsers.add_parser("dev", help="Start development mode with instant execution and hot check")
+    dev_p = subparsers.add_parser(
+        "dev",
+        help="Run a file in development mode with instant feedback (e.g. nova dev examples/hello.nova)",
+    )
     dev_p.add_argument("file", nargs="?", default="src/main.nova", help="Path to .nova source file (default: src/main.nova)")
     dev_p.add_argument("args", nargs=argparse.REMAINDER, help="Arguments passed to the executable")
 

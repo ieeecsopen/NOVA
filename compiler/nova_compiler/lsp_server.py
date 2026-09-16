@@ -29,7 +29,17 @@ KEYWORDS = [
 # The capabilities that actually exist (std/prelude.nova).
 CAPABILITIES = ["Runtime", "Clock", "Filesystem", "Network"]
 
-STDLIB_TYPES = ["Int", "Bool", "String", "Unit", "Option", "Result", "List"]
+STDLIB_TYPES = {
+    "Int": {"detail": "primitive integer", "documentation": "Signed integer value."},
+    "Bool": {"detail": "primitive boolean", "documentation": "Logical true/false value."},
+    "String": {"detail": "primitive string", "documentation": "UTF-8 text value."},
+    "Unit": {"detail": "unit value", "documentation": "No-value result equivalent to `()`."},
+    "Option": {"detail": "enum Option[T]", "documentation": "Represents an optional value: Some(T) or None."},
+    "Result": {"detail": "enum Result[T, E]", "documentation": "Represents either success or failure with an error payload."},
+    "List": {"detail": "generic list type", "documentation": "Linked list structure with Nil and Cons constructors."},
+    "Runtime": {"detail": "capability", "documentation": "Host runtime capability that grants access to runtime services."},
+    "Clock": {"detail": "capability", "documentation": "Monotonic clock capability providing time readings via `now()`."},
+}
 
 # Semantic hover information for keywords, capabilities, and types.
 HOVER_INFO: dict[str, str] = {
@@ -136,11 +146,16 @@ class NovaLSPServer:
         elif method == "textDocument/completion":
             items = []
             for kw in KEYWORDS:
-                items.append({"label": kw, "kind": 14, "detail": "keyword"})
+                items.append({"label": kw, "kind": 14, "detail": "keyword", "documentation": "NOVA keyword."})
             for cap in CAPABILITIES:
-                items.append({"label": cap, "kind": 7, "detail": "system capability"})
-            for ty in STDLIB_TYPES:
-                items.append({"label": ty, "kind": 7, "detail": "core type"})
+                items.append({"label": cap, "kind": 7, "detail": "system capability", "documentation": f"Prelude capability: {cap}."})
+            for label, meta in STDLIB_TYPES.items():
+                items.append({
+                    "label": label,
+                    "kind": 7,
+                    "detail": meta["detail"],
+                    "documentation": meta["documentation"],
+                })
 
             self.send_response({
                 "jsonrpc": "2.0",
