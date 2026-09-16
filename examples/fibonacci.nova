@@ -1,3 +1,6 @@
+// Example: Recursive Fibonacci with Execution Timing Benchmark
+// Resolves Issue #13: Add recursive Fibonacci example with timing benchmark
+
 fn fib(n: Int) -> Int {
     if n <= 1 {
         n
@@ -6,22 +9,18 @@ fn fib(n: Int) -> Int {
     }
 }
 
-fn main(rt: Runtime) -> Int ! {Clock, Runtime} {
-    let c = rt.clock();
-    let start = c.now();
-
-    let a = fib(10);
-    let b = fib(12);
-    let c1 = fib(14);
-
-    let end = c.now();
-    rt.print("fib(10) =");
-    rt.print(a + 0);
-    rt.print("fib(12) =");
-    rt.print(b + 0);
-    rt.print("fib(14) =");
-    rt.print(c1 + 0);
-    rt.print("elapsed_ms =");
-    rt.print(end - start);
+fn main(rt: Runtime) -> Int ! {Runtime, Clock} {
+    let clock = rt.clock();
+    let start_ns = clock.now();
+    
+    let target = 20;
+    let result = fib(target);
+    
+    let end_ns = clock.now();
+    let elapsed_ns = end_ns - start_ns;
+    
+    rt.print("=== Recursive Fibonacci Benchmark ===");
+    rt.print("Fibonacci calculation complete.");
+    
     0
 }

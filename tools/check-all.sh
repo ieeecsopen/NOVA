@@ -107,6 +107,10 @@ echo "== regionlab (Milestone 1 prototype, docs/regionlab) =="
 "$PYTHON" regionlab/tests/run.py
 
 echo
+echo "== prototypes (WASI preview2 bridge) =="
+"$PYTHON" tests/prototypes/test_wasi_preview2_bridge.py
+
+echo
 echo "== vscode extension: LSP smoke test =="
 # Confirms `nova lsp` answers initialize / completion / diagnostics — the
 # three things the VS Code client depends on. Does not require npm.

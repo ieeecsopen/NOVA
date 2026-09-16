@@ -7,8 +7,13 @@ repo can report honest numbers for the work-stealing model.
 
 from __future__ import annotations
 
+import os
 import sys
 import time
+
+REPO_ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
+if REPO_ROOT not in sys.path:
+    sys.path.insert(0, REPO_ROOT)
 
 from regionlab.runtime import TaskScheduler
 

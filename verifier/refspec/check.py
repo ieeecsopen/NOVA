@@ -468,7 +468,7 @@ class Checker:
     # -------------------------------------------------------- visibility
     def check_visible(self, name: str, span: Span) -> None:
         owner = self.module_of.get(name)
-        if owner is None or owner == self.cur_module:
+        if owner is None or owner == self.cur_module or owner == "std.prelude":
             return
         if self.is_pub.get(name) and owner in self.imports.get(self.cur_module, ()):
             return

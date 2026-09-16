@@ -1,0 +1,28 @@
+name: Auto Request Reviewer
+
+on:
+  pull_request_target:
+    types: [opened, ready_for_review]
+
+jobs:
+  request-reviewer:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Automatically request review from Hesara2003
+        if: github.actor != 'Hesara2003'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            try {
+              await github.rest.pulls.requestReviewers({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: context.payload.pull_request.number,
+                reviewers: ['Hesara2003']
+              });
+              console.log('Successfully requested review from Hesara2003');
+            } catch (error) {
+              console.warn('Failed to request review:', error);
+            }

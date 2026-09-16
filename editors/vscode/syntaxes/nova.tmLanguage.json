@@ -62,6 +62,10 @@
           "match": "\\b(if|else|while|for|in|match)\\b"
         },
         {
+          "name": "keyword.control.contract.nova",
+          "match": "\\b(intent|requires|ensures)\\b"
+        },
+        {
           "name": "keyword.declaration.nova",
           "match": "\\b(fn|let|mut|struct|enum|trait|impl|import|capability|pub|self)\\b"
         },

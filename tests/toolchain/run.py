@@ -153,6 +153,33 @@ def test_fmt_examples_are_canonical():
             assert format_code(out) == out, f"{path}: formatting is not idempotent"
 
 
+def test_enterprise_demo_builds_successfully():
+    """The enterprise platform example builds cleanly."""
+    with tempfile.TemporaryDirectory() as d:
+        compiler = NovaCompiler(cache_dir=os.path.join(d, ".nova_cache"))
+        output = os.path.join(d, "enterprise-platform")
+        success, message, metrics = compiler.build_file(
+            os.path.join(EXAMPLES, "enterprise-platform.nova"),
+            output_binary=output)
+    assert success, message
+    assert metrics is not None
+    assert metrics.backend in ("native-c", "interpreter")
+
+
+def test_cli_demo_is_explicitly_interpreter_backed():
+    """Constructs outside the native C subset fall back to interpreter-backed runner."""
+    with tempfile.TemporaryDirectory() as d:
+        compiler = NovaCompiler(cache_dir=os.path.join(d, ".nova_cache"))
+        output = os.path.join(d, "cli-program")
+        success, message, metrics = compiler.build_file(
+            os.path.join(EXAMPLES, "cli-program.nova"),
+            output_binary=output)
+    assert success, message
+    assert metrics is not None
+    assert metrics.backend == "interpreter"
+    assert "enum types" in metrics.fallback_reason
+
+
 # ----------------------------------------------------------------- lint
 
 LINT_PROBE = """fn shadow() -> Int {

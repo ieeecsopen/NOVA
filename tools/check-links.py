@@ -49,13 +49,13 @@ def main() -> int:
              'dist', 'out', 'target'}
     docs = [p for p in ROOT.rglob('*.md')
             if _skip.isdisjoint(p.parts)]
-    anchors = {p: {slug(m.group(2)) for m in HEADING.finditer(p.read_text())}
+    anchors = {p: {slug(m.group(2)) for m in HEADING.finditer(p.read_text(encoding="utf-8"))}
                for p in docs}
 
     broken: list[str] = []
     checked = 0
     for doc in docs:
-        for m in LINK.finditer(_strip_code_spans(doc.read_text())):
+        for m in LINK.finditer(_strip_code_spans(doc.read_text(encoding="utf-8"))):
             link = m.group(1)
             if link.startswith(('http://', 'https://', 'mailto:', '#!')):
                 continue
