@@ -59,6 +59,10 @@ def _grade(result: CheckResult) -> None:
 
 
 def main(argv: list[str]) -> int:
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    if hasattr(sys.stderr, "reconfigure"):
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
     if len(argv) != 3 or argv[1] not in ("check", "run", "audit", "grade"):
         sys.stderr.write(USAGE)
         return 2
