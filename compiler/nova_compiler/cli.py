@@ -33,6 +33,10 @@ from .driver import NovaCompiler
 
 
 def main(argv: list[str] = None) -> int:
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    if hasattr(sys.stderr, "reconfigure"):
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
     if argv is None:
         argv = sys.argv[1:]
 
